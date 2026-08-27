@@ -1,0 +1,21 @@
+{{- /* Surcharge de partials/extend_footer.html — ajoute le gestionnaire de
+      clic manquant pour le bouton #theme-toggle. Le thème (version
+      installée ici) ne définit qu'un script qui fixe data-theme au
+      CHARGEMENT de la page (via localStorage), mais aucun script qui
+      réagit au clic sur le bouton — on l'ajoute nous-mêmes ici, en
+      utilisant le même mécanisme (attribut data-theme sur <html> +
+      clé localStorage "pref-theme") pour rester cohérent avec le script
+      déjà présent dans le <head>. */ -}}
+<script>
+(function () {
+  var btn = document.getElementById('theme-toggle');
+  if (!btn) return;
+  btn.addEventListener('click', function () {
+    var html = document.documentElement;
+    var current = html.dataset.theme === 'dark' ? 'dark' : 'light';
+    var next = current === 'dark' ? 'light' : 'dark';
+    html.dataset.theme = next;
+    try { localStorage.setItem('pref-theme', next); } catch (e) {}
+  });
+})();
+</script>
