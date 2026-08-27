@@ -7,7 +7,7 @@ hidemeta: false
 comments: false
 ---
 
-*Dernière mise à jour : [27 Août 2026]*
+*Dernière mise à jour : 27 Août 2026*
 
 Cette politique de confidentialité décrit comment **PySpatial Lab**
 (« nous », « notre », « le site ») collecte, utilise et protège les
