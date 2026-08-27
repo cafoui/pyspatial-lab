@@ -8,7 +8,7 @@ services:
     staticPublishPath: public
     envVars:
       - key: HUGO_VERSION
-        value: 0.134.3
+        value: 0.146.0
     headers:
       - path: /*
         name: X-Frame-Options
