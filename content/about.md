@@ -30,6 +30,6 @@ d'analyse spatiale jusqu'à la carte interactive publiée en ligne.
 
 ## Me contacter
 
-- GitHub : [cafoui](https://github.com/cafoui)
-- LinkedIn : [cafoui](https://www.linkedin.com/in/cafoui)
-- Email : cafouia@gmail.com
+- GitHub : [votre-pseudo](https://github.com/VOTRE-PSEUDO-GITHUB)
+- LinkedIn : [votre profil](https://www.linkedin.com/in/VOTRE-PROFIL)
+- Email : votre.email@example.com

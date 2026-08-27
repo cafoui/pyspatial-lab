@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tableau de bord sismique mondial — PySpatial Lab</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --ink:#0F2138; --ink-soft:#1B324E; --paper:#EDEFE9;
+    --brass:#C08A3E; --brass-dark:#A2712F;
+    --sage:#5C7A66; --slate:#486074; --crimson:#B33951;
+    --border:#2C4460;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; height:100%; font-family:'Public Sans',sans-serif; background:var(--ink); color:#EDEFE9; }
+
+  .psl-app{ display:flex; flex-direction:column; height:100vh; }
+
+  header.psl-bar{
+    background:var(--ink); border-bottom:1px solid var(--brass-dark);
+    padding:0.9rem 1.2rem; display:flex; align-items:baseline; gap:0.7rem; flex-wrap:wrap;
+  }
+  header.psl-bar h1{
+    font-family:'Fraunces',serif; font-size:1.15rem; margin:0; color:#fff; font-weight:700;
+  }
+  header.psl-bar span.tag{
+    font-family:'JetBrains Mono',monospace; font-size:0.72rem; letter-spacing:0.08em;
+    color:var(--brass); border:1px solid var(--brass-dark); padding:0.15rem 0.5rem; border-radius:3px;
+  }
+
+  .psl-body{ flex:1; display:flex; min-height:0; }
+
+  aside.psl-panel{
+    width:300px; flex-shrink:0; background:var(--ink-soft); border-right:1px solid var(--border);
+    padding:1.1rem; overflow-y:auto;
+  }
+  @media (max-width: 760px){
+    .psl-body{ flex-direction:column; }
+    aside.psl-panel{ width:100%; border-right:none; border-bottom:1px solid var(--border); max-height:44vh; }
+  }
+
+  .psl-group{ margin-bottom:1.4rem; }
+  .psl-group h2{
+    font-family:'JetBrains Mono',monospace; font-size:0.7rem; letter-spacing:0.1em; text-transform:uppercase;
+    color:#8FA0AE; margin:0 0 0.6rem;
+  }
+
+  select.psl-select{
+    width:100%; padding:0.5rem 0.6rem; font-family:'Public Sans',sans-serif; font-size:0.9rem;
+    background:var(--ink); color:#EDEFE9; border:1px solid var(--border); border-radius:4px;
+  }
+
+  .psl-mag-row{ display:flex; justify-content:space-between; font-family:'JetBrains Mono',monospace; font-size:0.8rem; color:#C7D0D8; margin-bottom:0.4rem; }
+  input[type="range"]{ width:100%; accent-color:var(--brass); }
+
+  .psl-stat{
+    background:var(--ink); border:1px solid var(--border); border-radius:6px; padding:0.8rem;
+    font-family:'JetBrains Mono',monospace;
+  }
+  .psl-stat strong{ display:block; font-size:1.6rem; color:#fff; font-family:'Fraunces',serif; }
+  .psl-stat small{ color:#8FA0AE; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.06em; }
+
+  .psl-legend{ display:flex; flex-direction:column; gap:0.4rem; font-size:0.82rem; }
+  .psl-legend div{ display:flex; align-items:center; gap:0.5rem; }
+  .psl-legend .dot{ width:11px; height:11px; border-radius:50%; flex-shrink:0; border:1px solid rgba(255,255,255,0.3); }
+
+  #psl-status{ font-size:0.78rem; color:#8FA0AE; font-family:'JetBrains Mono',monospace; margin-top:0.5rem; min-height:1.1em; }
+
+  #map{ flex:1; background:#0b1926; }
+
+  .leaflet-popup-content-wrapper{
+    background:var(--ink-soft); color:#EDEFE9; border:1px solid var(--brass-dark); border-radius:6px;
+  }
+  .leaflet-popup-tip{ background:var(--ink-soft); }
+  .psl-popup h3{ margin:0 0 0.3rem; font-family:'Fraunces',serif; font-size:1rem; }
+  .psl-popup table{ font-size:0.8rem; font-family:'JetBrains Mono',monospace; }
+  .psl-popup table td{ padding:0.1rem 0.4rem 0.1rem 0; color:#C7D0D8; }
+  .psl-popup a{ color:var(--brass); }
+</style>
+</head>
+<body>
+
+<div class="psl-app">
+
+  <header class="psl-bar">
+    <h1>Tableau de bord sismique mondial</h1>
+    <span class="tag">DONNÉES EN DIRECT · USGS</span>
+  </header>
+
+  <div class="psl-body">
+
+    <aside class="psl-panel">
+
+      <div class="psl-group">
+        <h2>Période</h2>
+        <select id="period" class="psl-select">
+          <option value="hour">Dernière heure</option>
+          <option value="day" selected>Dernières 24 heures</option>
+          <option value="week">Dernière semaine</option>
+          <option value="month">Dernier mois</option>
+        </select>
+      </div>
+
+      <div class="psl-group">
+        <h2>Magnitude minimale</h2>
+        <div class="psl-mag-row">
+          <span>Seuil</span>
+          <span id="magValue">0.0</span>
+        </div>
+        <input type="range" id="magFilter" min="0" max="7" step="0.5" value="0">
+      </div>
+
+      <div class="psl-group">
+        <div class="psl-stat">
+          <strong id="statCount">–</strong>
+          <small id="statLabel">séismes affichés</small>
+        </div>
+        <div id="psl-status">Chargement des données…</div>
+      </div>
+
+      <div class="psl-group">
+        <h2>Légende (magnitude)</h2>
+        <div class="psl-legend">
+          <div><span class="dot" style="background:#5C7A66"></span> &lt; 2 — micro-séisme</div>
+          <div><span class="dot" style="background:#486074"></span> 2 – 4 — léger</div>
+          <div><span class="dot" style="background:#C08A3E"></span> 4 – 6 — modéré</div>
+          <div><span class="dot" style="background:#B33951"></span> ≥ 6 — fort</div>
+        </div>
+      </div>
+
+      <div class="psl-group">
+        <h2>Source</h2>
+        <div style="font-size:0.78rem; color:#8FA0AE; line-height:1.5;">
+          Flux GeoJSON public de l'<a href="https://earthquake.usgs.gov/earthquake/feed/v1.0/geojson.php" style="color:var(--brass)" target="_blank" rel="noopener">USGS Earthquake Hazards Program</a>, sans clé d'API.
+        </div>
+      </div>
+
+    </aside>
+
+    <div id="map"></div>
+
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+  // ---------------------------------------------------------------
+  // 1) Initialisation de la carte
+  // ---------------------------------------------------------------
+  const map = L.map('map', { worldCopyJump: true }).setView([15, 10], 2);
+
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    attribution: '&copy; OpenStreetMap &copy; CARTO',
+    maxZoom: 18
+  }).addTo(map);
+
+  const markersLayer = L.layerGroup().addTo(map);
+
+  // ---------------------------------------------------------------
+  // 2) État de l'application
+  // ---------------------------------------------------------------
+  let rawFeatures = [];   // toutes les features renvoyées par l'API pour la période choisie
+  const els = {
+    period: document.getElementById('period'),
+    mag: document.getElementById('magFilter'),
+    magValue: document.getElementById('magValue'),
+    statCount: document.getElementById('statCount'),
+    statLabel: document.getElementById('statLabel'),
+    status: document.getElementById('psl-status'),
+  };
+
+  const FEED_BASE = 'https://earthquake.usgs.gov/earthquake/feed/v1.0/summary/all_';
+
+  // ---------------------------------------------------------------
+  // 3) Style des marqueurs selon la magnitude
+  // ---------------------------------------------------------------
+  function colorForMag(m) {
+    if (m >= 6) return '#B33951';
+    if (m >= 4) return '#C08A3E';
+    if (m >= 2) return '#486074';
+    return '#5C7A66';
+  }
+  function radiusForMag(m) {
+    return Math.max(4, m * 3.2);
+  }
+
+  // ---------------------------------------------------------------
+  // 4) Récupération des données (appelée au chargement et à chaque
+  //    changement de période)
+  // ---------------------------------------------------------------
+  async function loadData(period) {
+    els.status.textContent = 'Chargement des données…';
+    try {
+      const res = await fetch(`${FEED_BASE}${period}.geojson`);
+      if (!res.ok) throw new Error('Réponse réseau invalide');
+      const data = await res.json();
+      rawFeatures = data.features || [];
+      els.status.textContent = `Mis à jour : ${new Date().toLocaleTimeString('fr-FR')}`;
+      render();
+    } catch (err) {
+      els.status.textContent = "Impossible de charger les données (hors-ligne ?)";
+      console.error(err);
+    }
+  }
+
+  // ---------------------------------------------------------------
+  // 5) Rendu : applique le filtre de magnitude sur les données déjà
+  //    chargées, sans refaire d'appel réseau
+  // ---------------------------------------------------------------
+  function render() {
+    const threshold = parseFloat(els.mag.value);
+    markersLayer.clearLayers();
+
+    let visible = 0;
+    rawFeatures.forEach(f => {
+      const mag = f.properties.mag;
+      if (mag === null || mag < threshold) return;
+      visible++;
+
+      const [lon, lat, depth] = f.geometry.coordinates;
+      const marker = L.circleMarker([lat, lon], {
+        radius: radiusForMag(mag),
+        color: '#0F2138',
+        weight: 1,
+        fillColor: colorForMag(mag),
+        fillOpacity: 0.8
+      });
+
+      const date = new Date(f.properties.time).toLocaleString('fr-FR');
+      marker.bindPopup(`
+        <div class="psl-popup">
+          <h3>${f.properties.place || 'Lieu inconnu'}</h3>
+          <table>
+            <tr><td>Magnitude</td><td><strong>${mag.toFixed(1)}</strong></td></tr>
+            <tr><td>Profondeur</td><td>${depth.toFixed(1)} km</td></tr>
+            <tr><td>Date</td><td>${date}</td></tr>
+          </table>
+          <a href="${f.properties.url}" target="_blank" rel="noopener">Voir la fiche USGS →</a>
+        </div>
+      `);
+
+      markersLayer.addLayer(marker);
+    });
+
+    els.statCount.textContent = visible;
+    els.statLabel.textContent = `séisme${visible > 1 ? 's' : ''} affiché${visible > 1 ? 's' : ''} / ${rawFeatures.length}`;
+  }
+
+  // ---------------------------------------------------------------
+  // 6) Écouteurs d'événements pour les filtres dynamiques
+  // ---------------------------------------------------------------
+  els.period.addEventListener('change', () => loadData(els.period.value));
+
+  els.mag.addEventListener('input', () => {
+    els.magValue.textContent = parseFloat(els.mag.value).toFixed(1);
+    render();
+  });
+
+  // ---------------------------------------------------------------
+  // 7) Démarrage
+  // ---------------------------------------------------------------
+  loadData(els.period.value);
+</script>
+
+</body>
+</html>
