@@ -1,0 +1,195 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [2.3912, 6.3703] },
+      "properties": {
+        "nom": "Pépinière Vert Avenir",
+        "commune": "Cotonou",
+        "departement": "Littoral",
+        "adresse": "Quartier Fidjrossè, non loin du carrefour",
+        "responsable": "Julienne AHOUANSOU",
+        "telephone": "+229 97 00 11 22",
+        "email": "contact@vertavenir.bj",
+        "especes": ["Teck", "Manguier", "Moringa"],
+        "capacite_plants": 4500,
+        "statut": "Active",
+        "date_creation": "2021",
+        "photo": "https://placehold.co/500x350/5C7A66/FFFFFF?text=Pépinière+Vert+Avenir",
+        "description": "Spécialisée dans les plants fruitiers et le reboisement communautaire."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [2.6289, 6.4969] },
+      "properties": {
+        "nom": "Pépinière du Golfe",
+        "commune": "Porto-Novo",
+        "departement": "Ouémé",
+        "adresse": "Route de Adjarra, zone maraîchère",
+        "responsable": "Fabrice DOSSOU",
+        "telephone": "+229 96 12 34 56",
+        "email": "pepiniere.golfe@example.bj",
+        "especes": ["Acajou", "Anacardier", "Eucalyptus"],
+        "capacite_plants": 8000,
+        "statut": "Active",
+        "date_creation": "2018",
+        "photo": "https://placehold.co/500x350/5C7A66/FFFFFF?text=Pépinière+du+Golfe",
+        "description": "Grande capacité de production, fournit plusieurs projets de reboisement de l'Ouémé."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [2.3559, 6.4489] },
+      "properties": {
+        "nom": "Pépinière Espoir Vert",
+        "commune": "Abomey-Calavi",
+        "departement": "Atlantique",
+        "adresse": "Zone universitaire, akassato",
+        "responsable": "Marcelline HOUNKPATIN",
+        "telephone": "+229 95 44 33 22",
+        "email": "espoirvert@example.bj",
+        "especes": ["Papayer", "Citronnier", "Moringa", "Palmier à huile"],
+        "capacite_plants": 3200,
+        "statut": "En pause",
+        "date_creation": "2022",
+        "photo": "https://placehold.co/500x350/486074/FFFFFF?text=Espoir+Vert",
+        "description": "Actuellement en pause pour cause de rénovation du site de production."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [2.6303, 9.3372] },
+      "properties": {
+        "nom": "Pépinière du Borgou",
+        "commune": "Parakou",
+        "departement": "Borgou",
+        "adresse": "Secteur Banikanni",
+        "responsable": "Ibrahim SEIDOU",
+        "telephone": "+229 61 22 33 44",
+        "email": "pepiniereborgou@example.bj",
+        "especes": ["Neem", "Teck", "Gmelina"],
+        "capacite_plants": 6000,
+        "statut": "Active",
+        "date_creation": "2017",
+        "photo": "https://placehold.co/500x350/5C7A66/FFFFFF?text=Pépinière+du+Borgou",
+        "description": "Approvisionne les projets de lutte contre la désertification du Nord-Bénin."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [2.0667, 7.1781] },
+      "properties": {
+        "nom": "Pépinière Zoun Vert",
+        "commune": "Bohicon",
+        "departement": "Zou",
+        "adresse": "Quartier Gbozounkpa",
+        "responsable": "Clarisse AGOSSOU",
+        "telephone": "+229 94 55 66 77",
+        "email": "zounvert@example.bj",
+        "especes": ["Manguier", "Anacardier", "Citronnier"],
+        "capacite_plants": 5100,
+        "statut": "Active",
+        "date_creation": "2020",
+        "photo": "https://placehold.co/500x350/5C7A66/FFFFFF?text=Zoun+Vert",
+        "description": "Pépinière familiale, spécialisée dans les arbres fruitiers greffés."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [1.3796, 10.3042] },
+      "properties": {
+        "nom": "Pépinière de l'Atacora",
+        "commune": "Natitingou",
+        "departement": "Atacora",
+        "adresse": "Sortie vers Boukoumbé",
+        "responsable": "Bio Tchoro YARO",
+        "telephone": "+229 62 88 99 00",
+        "email": "pepiniereatacora@example.bj",
+        "especes": ["Teck", "Neem", "Gmelina"],
+        "capacite_plants": 7200,
+        "statut": "Active",
+        "date_creation": "2016",
+        "photo": "https://placehold.co/500x350/5C7A66/FFFFFF?text=Pépinière+Atacora",
+        "description": "Partenaire de plusieurs ONG pour les campagnes annuelles de reboisement."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [1.6663, 9.7085] },
+      "properties": {
+        "nom": "Pépinière Donga Verte",
+        "commune": "Djougou",
+        "departement": "Donga",
+        "adresse": "Quartier Wodocomè",
+        "responsable": "Salifou ISSA",
+        "telephone": "+229 90 11 22 33",
+        "email": "dongaverte@example.bj",
+        "especes": ["Anacardier", "Teck"],
+        "capacite_plants": 4800,
+        "statut": "En pause",
+        "date_creation": "2019",
+        "photo": "https://placehold.co/500x350/486074/FFFFFF?text=Donga+Verte",
+        "description": "Production suspendue en attendant l'extension du forage d'irrigation."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [1.7167, 6.6389] },
+      "properties": {
+        "nom": "Pépinière du Mono",
+        "commune": "Lokossa",
+        "departement": "Mono",
+        "adresse": "Route de Athiémé",
+        "responsable": "Angèle KPOSSOU",
+        "telephone": "+229 97 66 55 44",
+        "email": "pepinieremono@example.bj",
+        "especes": ["Cocotier", "Palmier à huile", "Manguier"],
+        "capacite_plants": 3900,
+        "statut": "Active",
+        "date_creation": "2021",
+        "photo": "https://placehold.co/500x350/5C7A66/FFFFFF?text=Pépinière+du+Mono",
+        "description": "Spécialisée dans les espèces adaptées aux zones littorales."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [2.0852, 6.3626] },
+      "properties": {
+        "nom": "Pépinière Racines d'Ouidah",
+        "commune": "Ouidah",
+        "departement": "Atlantique",
+        "adresse": "Quartier Djègbadji",
+        "responsable": "Prosper AKPOVI",
+        "telephone": "+229 96 77 88 99",
+        "email": "racinesouidah@example.bj",
+        "especes": ["Teck", "Manguier", "Moringa", "Citronnier"],
+        "capacite_plants": 5600,
+        "statut": "Active",
+        "date_creation": "2015",
+        "photo": "https://placehold.co/500x350/5C7A66/FFFFFF?text=Racines+d'Ouidah",
+        "description": "L'une des plus anciennes pépinières de la commune, reconnue pour la qualité de ses plants."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [2.9386, 11.1342] },
+      "properties": {
+        "nom": "Pépinière de l'Alibori",
+        "commune": "Kandi",
+        "departement": "Alibori",
+        "adresse": "Zone maraîchère de Sam",
+        "responsable": "Moussa GARBA",
+        "telephone": "+229 61 99 88 77",
+        "email": "pepiniere.alibori@example.bj",
+        "especes": ["Neem", "Anacardier", "Eucalyptus"],
+        "capacite_plants": 6700,
+        "statut": "Active",
+        "date_creation": "2018",
+        "photo": "https://placehold.co/500x350/5C7A66/FFFFFF?text=Pépinière+Alibori",
+        "description": "Fournit les principaux projets agroforestiers du Nord-Bénin."
+      }
+    }
+  ]
+}
