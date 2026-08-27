@@ -3,7 +3,11 @@
    Palette : carte topographique / instruments d'arpentage
    ========================================================= */
 
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+/* Les polices Google Fonts sont chargées via <link> dans le <head>
+   (voir layouts/partials/extend_head.html) plutôt que par @import ici :
+   Hugo concatène ce fichier APRÈS le CSS du thème dans un seul fichier
+   final, et la règle @import n'est alors plus en tout premier — le
+   navigateur l'ignore silencieusement dans ce cas. */
 
 :root {
   --psl-ink: #0F2138;
