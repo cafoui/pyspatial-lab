@@ -63,35 +63,35 @@ params:
 
 menu:
   main:
-    - identifier: about
+    - identifier: nav-about
       name: À Propos
       url: /about/
       weight: 10
-    - identifier: contact
+    - identifier: nav-contact
       name: Contact
       url: /contact/
       weight: 15
-    - identifier: categories
+    - identifier: nav-categories
       name: Catégories
       url: /categories/
       weight: 20
-    - identifier: python
+    - identifier: nav-python
       name: Python
       url: /categories/python/
       weight: 30
-    - identifier: postgis
+    - identifier: nav-postgis
       name: PostGIS
       url: /categories/postgis/
       weight: 40
-    - identifier: websig
+    - identifier: nav-websig
       name: Web-SIG
       url: /categories/web-sig/
       weight: 50
-    - identifier: kobotoolbox
+    - identifier: nav-kobotoolbox
       name: KoboToolbox
       url: /categories/kobotoolbox/
       weight: 60
-    - identifier: search
+    - identifier: nav-search
       name: Rechercher
       url: /search/
       weight: 70
