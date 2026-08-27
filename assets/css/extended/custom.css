@@ -31,8 +31,7 @@
 }
 
 html.dark,
-html.dark body,
-body.dark {
+html.dark body {
   --theme: var(--psl-ink) !important;
   --entry: var(--psl-ink-soft) !important;
   --primary: #EDEFE9 !important;
