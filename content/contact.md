@@ -12,9 +12,9 @@ comments: false
 Une question sur un article, une suggestion de sujet, une proposition de
 collaboration ? N'hésitez pas à me contacter.
 
-- **Email** : [votre.email@example.com](mailto:votre.email@example.com)
-- **GitHub** : [github.com/VOTRE-PSEUDO-GITHUB](https://github.com/VOTRE-PSEUDO-GITHUB)
-- **LinkedIn** : [linkedin.com/in/VOTRE-PROFIL](https://www.linkedin.com/in/VOTRE-PROFIL)
+- **Email** : [cafouia@gmail.com](mailto:cafouia@gmail.com)
+- **GitHub** : [github.com/cafoui](https://github.com/cafoui)
+- **LinkedIn** : [linkedin.com/in/cafoui](https://www.linkedin.com/in/cafoui)
 
 ## Formulaire de contact
 
