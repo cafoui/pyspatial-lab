@@ -26,14 +26,15 @@
   --border: #CFD4C6;
 }
 
-.dark {
-  --theme: var(--psl-ink);
-  --entry: var(--psl-ink-soft);
-  --primary: #EDEFE9;
-  --secondary: #A9B7C4;
-  --tertiary: #22374F;
-  --content: #DCE2E6;
-  --border: #2C4460;
+html.dark,
+html.dark body {
+  --theme: var(--psl-ink) !important;
+  --entry: var(--psl-ink-soft) !important;
+  --primary: #EDEFE9 !important;
+  --secondary: #A9B7C4 !important;
+  --tertiary: #22374F !important;
+  --content: #DCE2E6 !important;
+  --border: #2C4460 !important;
 }
 
 body {
