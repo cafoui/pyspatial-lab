@@ -1,6 +1,6 @@
 ---
 title: "Importer des données OpenStreetMap dans PostGIS avec osm2pgsql"
-date: 2026-01-28T10:00:00+01:00
+date: 2026-08-26T10:00:00+01:00
 draft: false
 categories: ["PostGIS"]
 tags: ["postgis", "osm2pgsql", "openstreetmap", "postgresql"]
