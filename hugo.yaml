@@ -2,7 +2,8 @@ baseURL: "https://VOTRE-PSEUDO-GITHUB.github.io/pyspatial-lab/"
 title: PySpatial Lab
 theme: PaperMod
 languageCode: fr-fr
-paginate: 8
+pagination:
+  pagerSize: 8
 
 enableInlineShortcodes: true
 enableEmoji: true
