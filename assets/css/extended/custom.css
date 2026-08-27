@@ -30,8 +30,7 @@
   --border: #CFD4C6;
 }
 
-html.dark,
-html.dark body {
+html[data-theme="dark"] {
   --theme: var(--psl-ink) !important;
   --entry: var(--psl-ink-soft) !important;
   --primary: #EDEFE9 !important;
@@ -58,7 +57,7 @@ code, pre, .post-content code, kbd,
 }
 
 a { color: var(--psl-brass-dark); }
-.dark a { color: var(--psl-brass); }
+html[data-theme="dark"] a { color: var(--psl-brass); }
 
 .nav > .logo a, .nav #menu a { font-family: 'Fraunces', serif; font-weight: 700; }
 
@@ -263,7 +262,7 @@ button, .top-link, .archive-meta {
 
 .psl-breadcrumbs a { color: var(--secondary); text-decoration: none; }
 .psl-breadcrumbs a:hover { color: var(--psl-brass-dark); }
-.dark .psl-breadcrumbs a:hover { color: var(--psl-brass); }
+html[data-theme="dark"] .psl-breadcrumbs a:hover { color: var(--psl-brass); }
 .psl-breadcrumbs__sep { margin: 0 0.4rem; opacity: 0.5; }
 .psl-breadcrumbs__current { color: var(--primary); }
 
@@ -359,7 +358,7 @@ button, .top-link, .archive-meta {
 a[href*="/categories/python/"]      { color: var(--psl-sage) !important; border-color: var(--psl-sage) !important; }
 a[href*="/categories/postgis/"]     { color: var(--psl-slate) !important; border-color: var(--psl-slate) !important; }
 a[href*="/categories/web-sig/"]     { color: var(--psl-brass-dark) !important; border-color: var(--psl-brass) !important; }
-.dark a[href*="/categories/web-sig/"] { color: var(--psl-brass) !important; }
+html[data-theme="dark"] a[href*="/categories/web-sig/"] { color: var(--psl-brass) !important; }
 a[href*="/categories/kobotoolbox/"] { color: #8B5CF6 !important; border-color: #8B5CF6 !important; }
 
 /* ---------------------------------------------------------
