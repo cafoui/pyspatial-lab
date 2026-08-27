@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Géoportail des Pépinières — Bénin</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --ink:#0F2138; --ink-soft:#1B324E; --paper:#EDEFE9;
+    --brass:#C08A3E; --brass-dark:#A2712F;
+    --sage:#5C7A66; --slate:#486074; --crimson:#B33951;
+    --border:#2C4460;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; height:100%; font-family:'Public Sans',sans-serif; background:var(--ink); color:#EDEFE9; }
+
+  .gp-app{ display:flex; flex-direction:column; height:100vh; }
+
+  header.gp-bar{
+    background:var(--ink); border-bottom:1px solid var(--brass-dark);
+    padding:0.9rem 1.2rem; display:flex; align-items:baseline; gap:0.7rem; flex-wrap:wrap;
+  }
+  header.gp-bar h1{ font-family:'Fraunces',serif; font-size:1.15rem; margin:0; color:#fff; font-weight:700; }
+  header.gp-bar span.tag{
+    font-family:'JetBrains Mono',monospace; font-size:0.72rem; letter-spacing:0.08em;
+    color:var(--brass); border:1px solid var(--brass-dark); padding:0.15rem 0.5rem; border-radius:3px;
+  }
+
+  .gp-body{ flex:1; display:flex; min-height:0; }
+
+  aside.gp-panel{
+    width:340px; flex-shrink:0; background:var(--ink-soft); border-right:1px solid var(--border);
+    padding:1.1rem; overflow-y:auto; display:flex; flex-direction:column; gap:1.2rem;
+  }
+  @media (max-width: 860px){
+    .gp-body{ flex-direction:column; }
+    aside.gp-panel{ width:100%; border-right:none; border-bottom:1px solid var(--border); max-height:50vh; }
+  }
+
+  .gp-group h2{
+    font-family:'JetBrains Mono',monospace; font-size:0.7rem; letter-spacing:0.1em; text-transform:uppercase;
+    color:#8FA0AE; margin:0 0 0.6rem;
+  }
+
+  input.gp-input, select.gp-select{
+    width:100%; padding:0.5rem 0.6rem; font-family:'Public Sans',sans-serif; font-size:0.9rem;
+    background:var(--ink); color:#EDEFE9; border:1px solid var(--border); border-radius:4px; margin-bottom:0.5rem;
+  }
+  input.gp-input:focus, select.gp-select:focus{ outline:none; border-color:var(--brass); }
+
+  .gp-stats{ display:flex; gap:0.6rem; }
+  .gp-stat{
+    flex:1; background:var(--ink); border:1px solid var(--border); border-radius:6px; padding:0.7rem;
+    font-family:'JetBrains Mono',monospace; text-align:center;
+  }
+  .gp-stat strong{ display:block; font-size:1.4rem; color:#fff; font-family:'Fraunces',serif; }
+  .gp-stat small{ color:#8FA0AE; font-size:0.66rem; text-transform:uppercase; letter-spacing:0.05em; }
+
+  .gp-legend{ display:flex; flex-direction:column; gap:0.4rem; font-size:0.82rem; }
+  .gp-legend div{ display:flex; align-items:center; gap:0.5rem; }
+  .gp-legend .dot{ width:11px; height:11px; border-radius:50%; flex-shrink:0; border:1px solid rgba(255,255,255,0.3); }
+
+  .gp-list{ display:flex; flex-direction:column; gap:0.5rem; }
+  .gp-card{
+    background:var(--ink); border:1px solid var(--border); border-radius:6px; padding:0.6rem 0.7rem;
+    cursor:pointer; transition:border-color 0.15s ease, transform 0.15s ease;
+  }
+  .gp-card:hover{ border-color:var(--brass); transform:translateX(2px); }
+  .gp-card h3{ margin:0 0 0.15rem; font-family:'Fraunces',serif; font-size:0.95rem; color:#fff; }
+  .gp-card .meta{ font-family:'JetBrains Mono',monospace; font-size:0.7rem; color:#8FA0AE; }
+  .gp-card .badge{
+    display:inline-block; font-size:0.65rem; padding:0.1rem 0.4rem; border-radius:3px; margin-top:0.3rem;
+    font-family:'JetBrains Mono',monospace; text-transform:uppercase; letter-spacing:0.04em;
+  }
+  .badge.active{ background:rgba(92,122,102,0.25); color:var(--sage); border:1px solid var(--sage); }
+  .badge.pause{ background:rgba(72,96,116,0.25); color:var(--slate); border:1px solid var(--slate); }
+
+  #map{ flex:1; }
+  #map .leaflet-tile-pane{ filter: invert(1) hue-rotate(180deg) brightness(0.95) contrast(0.9) saturate(0.8); }
+
+  .leaflet-popup-content-wrapper{ background:var(--ink-soft); color:#EDEFE9; border:1px solid var(--brass-dark); border-radius:6px; }
+  .leaflet-popup-tip{ background:var(--ink-soft); }
+  .gp-popup{ font-family:'Public Sans',sans-serif; max-width:230px; }
+  .gp-popup img{ width:100%; border-radius:4px; margin-bottom:0.5rem; display:block; }
+  .gp-popup h3{ margin:0 0 0.3rem; font-family:'Fraunces',serif; font-size:1rem; }
+  .gp-popup table{ font-size:0.78rem; font-family:'JetBrains Mono',monospace; border-collapse:collapse; }
+  .gp-popup table td{ padding:0.1rem 0.4rem 0.1rem 0; color:#C7D0D8; vertical-align:top; }
+  .gp-popup .desc{ font-size:0.82rem; color:#C7D0D8; margin:0.4rem 0; line-height:1.4; }
+</style>
+</head>
+<body>
+
+<div class="gp-app">
+
+  <header class="gp-bar">
+    <h1>Géoportail des Pépinières</h1>
+    <span class="tag">DONNÉES DE DÉMONSTRATION · BÉNIN</span>
+  </header>
+
+  <div class="gp-body">
+
+    <aside class="gp-panel">
+
+      <div class="gp-group">
+        <h2>Recherche</h2>
+        <input type="text" id="search" class="gp-input" placeholder="Nom ou commune…">
+      </div>
+
+      <div class="gp-group">
+        <h2>Filtres</h2>
+        <select id="filterCommune" class="gp-select">
+          <option value="">Toutes les communes</option>
+        </select>
+        <select id="filterEspece" class="gp-select">
+          <option value="">Toutes les espèces</option>
+        </select>
+        <select id="filterStatut" class="gp-select">
+          <option value="">Tous les statuts</option>
+          <option value="Active">Active</option>
+          <option value="En pause">En pause</option>
+        </select>
+      </div>
+
+      <div class="gp-group">
+        <div class="gp-stats">
+          <div class="gp-stat">
+            <strong id="statCount">–</strong>
+            <small>pépinières</small>
+          </div>
+          <div class="gp-stat">
+            <strong id="statPlants">–</strong>
+            <small>plants en stock</small>
+          </div>
+        </div>
+      </div>
+
+      <div class="gp-group">
+        <h2>Légende</h2>
+        <div class="gp-legend">
+          <div><span class="dot" style="background:#5C7A66"></span> Pépinière active</div>
+          <div><span class="dot" style="background:#486074"></span> En pause</div>
+        </div>
+      </div>
+
+      <div class="gp-group" style="flex:1; min-height:0; display:flex; flex-direction:column;">
+        <h2>Résultats</h2>
+        <div class="gp-list" id="list"></div>
+      </div>
+
+    </aside>
+
+    <div id="map"></div>
+
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+  // ---------------------------------------------------------------
+  // 1) Initialisation de la carte, centrée sur le Bénin
+  // ---------------------------------------------------------------
+  const map = L.map('map').setView([9.3, 2.3], 7);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    maxZoom: 19
+  }).addTo(map);
+
+  const markersLayer = L.layerGroup().addTo(map);
+  const markerById = {};   // pour retrouver un marqueur depuis la liste
+
+  // ---------------------------------------------------------------
+  // 2) État de l'application
+  // ---------------------------------------------------------------
+  let allFeatures = [];
+
+  const els = {
+    search: document.getElementById('search'),
+    commune: document.getElementById('filterCommune'),
+    espece: document.getElementById('filterEspece'),
+    statut: document.getElementById('filterStatut'),
+    list: document.getElementById('list'),
+    statCount: document.getElementById('statCount'),
+    statPlants: document.getElementById('statPlants'),
+  };
+
+  // ---------------------------------------------------------------
+  // 3) Charger les données (fichier GeoJSON local, à remplacer par
+  //    les vraies données — voir l'article du blog)
+  // ---------------------------------------------------------------
+  async function loadData() {
+    const res = await fetch('./data/pepinieres-benin.geojson');
+    const geojson = await res.json();
+    allFeatures = geojson.features;
+
+    populateFilterOptions();
+    render();
+  }
+
+  function populateFilterOptions() {
+    const communes = [...new Set(allFeatures.map(f => f.properties.commune))].sort();
+    communes.forEach(c => {
+      const opt = document.createElement('option');
+      opt.value = c; opt.textContent = c;
+      els.commune.appendChild(opt);
+    });
+
+    const especes = [...new Set(allFeatures.flatMap(f => f.properties.especes))].sort();
+    especes.forEach(e => {
+      const opt = document.createElement('option');
+      opt.value = e; opt.textContent = e;
+      els.espece.appendChild(opt);
+    });
+  }
+
+  // ---------------------------------------------------------------
+  // 4) Filtrage : texte de recherche + 3 filtres combinés
+  // ---------------------------------------------------------------
+  function getFiltered() {
+    const q = els.search.value.trim().toLowerCase();
+    const commune = els.commune.value;
+    const espece = els.espece.value;
+    const statut = els.statut.value;
+
+    return allFeatures.filter(f => {
+      const p = f.properties;
+      if (q && !(p.nom.toLowerCase().includes(q) || p.commune.toLowerCase().includes(q))) return false;
+      if (commune && p.commune !== commune) return false;
+      if (espece && !p.especes.includes(espece)) return false;
+      if (statut && p.statut !== statut) return false;
+      return true;
+    });
+  }
+
+  // ---------------------------------------------------------------
+  // 5) Construire le contenu d'une popup
+  // ---------------------------------------------------------------
+  function popupHTML(p) {
+    return `
+      <div class="gp-popup">
+        <img src="${p.photo}" alt="${p.nom}">
+        <h3>${p.nom}</h3>
+        <p class="desc">${p.description}</p>
+        <table>
+          <tr><td>Commune</td><td>${p.commune} (${p.departement})</td></tr>
+          <tr><td>Espèces</td><td>${p.especes.join(', ')}</td></tr>
+          <tr><td>Capacité</td><td>${p.capacite_plants.toLocaleString('fr-FR')} plants</td></tr>
+          <tr><td>Statut</td><td>${p.statut}</td></tr>
+          <tr><td>Responsable</td><td>${p.responsable}</td></tr>
+          <tr><td>Téléphone</td><td>${p.telephone}</td></tr>
+        </table>
+      </div>
+    `;
+  }
+
+  // ---------------------------------------------------------------
+  // 6) Rendu : marqueurs sur la carte + liste dans la barre latérale
+  // ---------------------------------------------------------------
+  function render() {
+    const filtered = getFiltered();
+
+    markersLayer.clearLayers();
+    els.list.innerHTML = '';
+
+    let totalPlants = 0;
+
+    filtered.forEach((f, i) => {
+      const p = f.properties;
+      const [lon, lat] = f.geometry.coordinates;
+      const color = p.statut === 'Active' ? '#5C7A66' : '#486074';
+      totalPlants += p.capacite_plants;
+
+      const marker = L.circleMarker([lat, lon], {
+        radius: 8,
+        color: '#0F2138',
+        weight: 1.5,
+        fillColor: color,
+        fillOpacity: 0.9
+      }).bindPopup(popupHTML(p));
+
+      markersLayer.addLayer(marker);
+      markerById[i] = marker;
+
+      const card = document.createElement('div');
+      card.className = 'gp-card';
+      card.innerHTML = `
+        <h3>${p.nom}</h3>
+        <div class="meta">${p.commune} · ${p.capacite_plants.toLocaleString('fr-FR')} plants</div>
+        <span class="badge ${p.statut === 'Active' ? 'active' : 'pause'}">${p.statut}</span>
+      `;
+      card.addEventListener('click', () => {
+        map.setView([lat, lon], 12, { animate: true });
+        marker.openPopup();
+      });
+      els.list.appendChild(card);
+    });
+
+    els.statCount.textContent = filtered.length;
+    els.statPlants.textContent = totalPlants.toLocaleString('fr-FR');
+  }
+
+  // ---------------------------------------------------------------
+  // 7) Écouteurs d'événements pour les filtres dynamiques
+  // ---------------------------------------------------------------
+  [els.search, els.commune, els.espece, els.statut].forEach(el => {
+    el.addEventListener('input', render);
+    el.addEventListener('change', render);
+  });
+
+  // ---------------------------------------------------------------
+  // 8) Démarrage
+  // ---------------------------------------------------------------
+  loadData();
+</script>
+
+</body>
+</html>
