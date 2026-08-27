@@ -7,11 +7,11 @@ hidemeta: false
 comments: false
 ---
 
-*Dernière mise à jour : [DATE À COMPLÉTER]*
+*Dernière mise à jour : [27 Août 2026]*
 
 Cette politique de confidentialité décrit comment **PySpatial Lab**
 (« nous », « notre », « le site ») collecte, utilise et protège les
-informations des visiteurs de [https://VOTRE-PSEUDO-GITHUB.github.io/pyspatial-lab/](/).
+informations des visiteurs de [https://cafoui.github.io/pyspatial-lab/](/).
 
 ## 1. Informations que nous collectons
 
@@ -91,7 +91,7 @@ collecte pas sciemment de données personnelles les concernant.
 
 Pour toute question relative à cette politique de confidentialité :
 
-- **Email** : votre.email@example.com
+- **Email** : cafouia@gmail.com
 - Voir aussi notre [page Contact](/contact/)
 
 ## 9. Modifications de cette politique
@@ -102,7 +102,3 @@ mise à jour.
 
 ---
 
-*Ce document est un modèle de base destiné à couvrir les exigences
-courantes de Google AdSense. Il ne constitue pas un avis juridique — pour
-une conformité RGPD/CCPA complète adaptée à votre situation, il est
-recommandé de le faire relire par un professionnel du droit.*
