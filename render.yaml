@@ -2,7 +2,7 @@ services:
   - type: web
     name: pyspatial-lab
     runtime: static
-    repo: https://github.com/Vcafoui/pyspatial-lab
+    repo: https://github.com/cafoui/pyspatial-lab
     branch: main
     buildCommand: hugo --gc --minify --baseURL "$RENDER_EXTERNAL_URL"
     staticPublishPath: public
