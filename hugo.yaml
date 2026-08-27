@@ -1,0 +1,132 @@
+baseURL: "https://VOTRE-PSEUDO-GITHUB.github.io/pyspatial-lab/"
+title: PySpatial Lab
+theme: PaperMod
+languageCode: fr-fr
+paginate: 8
+
+enableInlineShortcodes: true
+enableEmoji: true
+enableRobotsTXT: true
+buildDrafts: false
+buildFuture: false
+buildExpired: false
+
+googleAnalytics: ""
+
+minify:
+  disableXML: true
+  minifyOutput: true
+
+params:
+  env: production
+  title: PySpatial Lab
+  description: "Blog géomatique : Python, PostGIS, Web-SIG et collecte de données terrain (KoboToolbox)."
+  keywords: [Blog, Géomatique, SIG, Python, PostGIS, WebGIS, KoboToolbox]
+  author: "AMOUSSOU Noël Précieux C."
+  # Identifiant éditeur Google AdSense (format "ca-pub-XXXXXXXXXXXXXXXX").
+  # Laissez vide tant que votre compte AdSense n'est pas approuvé —
+  # le script ne se charge que si cette valeur est renseignée.
+  adsenseClientID: ""
+  DateFormat: "2 January 2006"
+  defaultTheme: auto
+  disableThemeToggle: false
+  ShowShareButtons: true
+  ShowReadingTime: true
+  displayFullLangName: true
+  ShowPostNavLinks: true
+  ShowBreadCrumbs: true
+  ShowCodeCopyButtons: true
+  ShowToc: true
+  TocOpen: false
+  ShowWordCount: true
+  comments: false
+
+  # Le contenu du hero (courbes de niveau + panneau de couches) est défini
+  # dans layouts/partials/home_info.html — ce bloc reste requis pour que
+  # PaperMod active l'affichage du hero sur la page d'accueil.
+  homeInfoParams:
+    Title: "PySpatial Lab"
+    Content: " "
+
+  socialIcons:
+    - name: github
+      url: "https://github.com/cafoui"
+    - name: linkedin
+      url: "https://www.linkedin.com/in/cafoui"
+    - name: email
+      url: "mailto:cafouia@gmail.com"
+
+  assets:
+    disableHLJS: false
+    favicon: "/images/favicon.ico"
+
+menu:
+  main:
+    - identifier: about
+      name: À Propos
+      url: /about/
+      weight: 10
+    - identifier: contact
+      name: Contact
+      url: /contact/
+      weight: 15
+    - identifier: categories
+      name: Catégories
+      url: /categories/
+      weight: 20
+    - identifier: python
+      name: Python
+      url: /categories/python/
+      weight: 30
+    - identifier: postgis
+      name: PostGIS
+      url: /categories/postgis/
+      weight: 40
+    - identifier: websig
+      name: Web-SIG
+      url: /categories/web-sig/
+      weight: 50
+    - identifier: kobotoolbox
+      name: KoboToolbox
+      url: /categories/kobotoolbox/
+      weight: 60
+    - identifier: search
+      name: Rechercher
+      url: /search/
+      weight: 70
+
+outputs:
+  home:
+    - HTML
+    - RSS
+    - JSON
+
+taxonomies:
+  category: categories
+  tag: tags
+
+markup:
+  goldmark:
+    renderer:
+      unsafe: true
+  highlight:
+    noClasses: false
+    codeFences: true
+    guessSyntax: true
+    lineNos: true
+    style: monokai
+
+privacy:
+  vimeo:
+    disabled: false
+    simple: true
+  twitter:
+    disabled: false
+    enableDNT: true
+    simple: true
+  instagram:
+    disabled: false
+    simple: true
+  youtube:
+    disabled: false
+    privacyEnhanced: true

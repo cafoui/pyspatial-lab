@@ -1,0 +1,550 @@
+/* =========================================================
+   PySpatial Lab — identité visuelle personnalisée
+   Palette : carte topographique / instruments d'arpentage
+   ========================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+:root {
+  --psl-ink: #0F2138;
+  --psl-ink-soft: #1B324E;
+  --psl-paper: #EDEFE9;
+  --psl-paper-soft: #E2E5DC;
+  --psl-brass: #C08A3E;
+  --psl-brass-dark: #A2712F;
+  --psl-sage: #5C7A66;
+  --psl-slate: #486074;
+
+  /* Surcharge des variables PaperMod (mode clair) */
+  --theme: var(--psl-paper);
+  --entry: #ffffff;
+  --primary: var(--psl-ink);
+  --secondary: var(--psl-slate);
+  --tertiary: var(--psl-paper-soft);
+  --content: #24303B;
+  --code-block-bg: #16283F;
+  --border: #CFD4C6;
+}
+
+.dark {
+  --theme: var(--psl-ink);
+  --entry: var(--psl-ink-soft);
+  --primary: #EDEFE9;
+  --secondary: #A9B7C4;
+  --tertiary: #22374F;
+  --content: #DCE2E6;
+  --border: #2C4460;
+}
+
+body {
+  font-family: 'Public Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.post-title, .entry-hint, h1, h2, h3, h4,
+.page-header h1, article h1, article h2, article h3 {
+  font-family: 'Fraunces', Georgia, serif;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+code, pre, .post-content code, kbd,
+.psl-eyebrow, .psl-layer-count, .psl-layer-key {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+}
+
+a { color: var(--psl-brass-dark); }
+.dark a { color: var(--psl-brass); }
+
+.nav > .logo a, .nav #menu a { font-family: 'Fraunces', serif; font-weight: 700; }
+
+button, .top-link, .archive-meta {
+  border-radius: 4px;
+}
+
+/* ---------------------------------------------------------
+   HERO — courbes de niveau animées
+   --------------------------------------------------------- */
+.psl-hero {
+  position: relative;
+  overflow: hidden;
+  background: var(--psl-ink);
+  color: #EDEFE9;
+  padding: 4.5rem 1.5rem 3.5rem;
+  margin: 0 0 2.5rem;
+  border-bottom: 1px solid var(--psl-brass-dark);
+}
+
+.psl-hero__contours {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.psl-hero__contours svg {
+  width: 140%;
+  height: 100%;
+  animation: psl-drift 60s linear infinite;
+}
+
+@keyframes psl-drift {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-12%); }
+}
+
+.psl-hero__inner {
+  position: relative;
+  z-index: 1;
+  max-width: 720px;
+  margin: 0 auto;
+  text-align: left;
+}
+
+.psl-eyebrow {
+  display: inline-block;
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  color: var(--psl-brass);
+  border: 1px solid var(--psl-brass-dark);
+  padding: 0.25rem 0.6rem;
+  border-radius: 3px;
+  margin-bottom: 1.1rem;
+}
+
+.psl-hero h1 {
+  font-family: 'Fraunces', serif;
+  font-size: clamp(2.4rem, 5vw, 3.4rem);
+  line-height: 1.05;
+  margin: 0 0 0.9rem;
+  color: #fff;
+}
+
+.psl-hero h1 em {
+  font-style: italic;
+  color: var(--psl-brass);
+}
+
+.psl-hero p {
+  font-size: 1.05rem;
+  line-height: 1.6;
+  color: #C7D0D8;
+  max-width: 46ch;
+  margin: 0;
+}
+
+/* ---------------------------------------------------------
+   PANNEAU DE COUCHES — le geste signature
+   Reprend le vocabulaire d'un panneau de calques SIG
+   --------------------------------------------------------- */
+.psl-layers {
+  max-width: 720px;
+  margin: 2.2rem auto 0;
+  background: var(--psl-ink-soft);
+  border: 1px solid var(--psl-brass-dark);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.psl-layers__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.65rem 1rem;
+  background: rgba(255,255,255,0.03);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.psl-layers__header span {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  color: #8FA0AE;
+  text-transform: uppercase;
+}
+
+.psl-layer {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.7rem 1rem;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  transition: background 0.15s ease, padding-left 0.15s ease;
+}
+
+.psl-layer:last-child { border-bottom: none; }
+
+.psl-layer:hover {
+  background: rgba(192,138,62,0.08);
+  padding-left: 1.3rem;
+}
+
+.psl-layer__box {
+  width: 15px;
+  height: 15px;
+  border: 1.5px solid var(--psl-brass);
+  border-radius: 3px;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.psl-layer:hover .psl-layer__box::after {
+  content: "";
+  position: absolute;
+  inset: 2.5px;
+  background: var(--psl-brass);
+  border-radius: 1px;
+}
+
+.psl-layer__swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.psl-layer__label {
+  font-family: 'Public Sans', sans-serif;
+  font-weight: 600;
+  color: #EDEFE9;
+  flex: 1;
+}
+
+.psl-layer__desc {
+  font-size: 0.82rem;
+  color: #8FA0AE;
+  display: block;
+  font-weight: 400;
+}
+
+.psl-layer-count {
+  font-size: 0.75rem;
+  color: #8FA0AE;
+}
+
+/* ---------------------------------------------------------
+   Cartes d'articles — légère élévation au survol
+   --------------------------------------------------------- */
+.post-entry, .first-entry {
+  border: 1px solid var(--border);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+.post-entry:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 24px -12px rgba(15, 33, 56, 0.35);
+  border-color: var(--psl-brass);
+}
+
+.entry-header h2 { font-family: 'Fraunces', serif; }
+
+@media (prefers-reduced-motion: reduce) {
+  .psl-hero__contours svg { animation: none; }
+  .post-entry:hover { transform: none; }
+}
+
+/* ---------------------------------------------------------
+   FIL D'ARIANE
+   --------------------------------------------------------- */
+.psl-breadcrumbs {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.78rem;
+  color: var(--secondary);
+  margin: 0 auto 1.2rem;
+  max-width: var(--main-width, 720px);
+  padding: 0 var(--gap, 1rem);
+}
+
+.psl-breadcrumbs a { color: var(--secondary); text-decoration: none; }
+.psl-breadcrumbs a:hover { color: var(--psl-brass-dark); }
+.dark .psl-breadcrumbs a:hover { color: var(--psl-brass); }
+.psl-breadcrumbs__sep { margin: 0 0.4rem; opacity: 0.5; }
+.psl-breadcrumbs__current { color: var(--primary); }
+
+/* ---------------------------------------------------------
+   PAGE ARTICLE (post-single)
+   --------------------------------------------------------- */
+.post-single .post-title {
+  font-size: clamp(1.9rem, 4vw, 2.6rem);
+}
+
+.post-single .post-header {
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 1.4rem;
+  margin-bottom: 1.8rem;
+}
+
+.post-single .post-meta,
+.post-meta {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.78rem;
+  letter-spacing: 0.01em;
+}
+
+.post-content { font-size: 1.05rem; line-height: 1.75; }
+
+.post-content blockquote {
+  border-left: 3px solid var(--psl-brass);
+  background: var(--tertiary);
+  padding: 0.85rem 1.1rem;
+  border-radius: 0 4px 4px 0;
+  font-style: italic;
+}
+
+.post-content code {
+  background: var(--tertiary);
+  padding: 0.15em 0.4em;
+  border-radius: 3px;
+  font-size: 0.9em;
+}
+
+.post-content pre code { background: none; padding: 0; }
+
+.post-content pre {
+  border: 1px solid var(--psl-brass-dark);
+  border-radius: 6px;
+}
+
+.post-content table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 0.92rem;
+}
+
+.post-content table th, .post-content table td {
+  border: 1px solid var(--border);
+  padding: 0.5rem 0.75rem;
+}
+
+.post-content table th {
+  background: var(--tertiary);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.post-content hr {
+  border: none;
+  border-top: 1px dashed var(--border);
+  margin: 2.2rem 0;
+}
+
+.post-content img {
+  border-radius: 6px;
+  border: 1px solid var(--border);
+}
+
+/* Pastilles de catégories/tags, couleur par couche (via href) */
+.post-meta a, .terms-tags a, .entry-header a {
+  border-radius: 3px;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.terms-tags a {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.78rem;
+  border: 1px solid var(--border);
+  padding: 0.2rem 0.55rem !important;
+  border-radius: 3px !important;
+  background: var(--tertiary);
+}
+
+a[href*="/categories/python/"]      { color: var(--psl-sage) !important; border-color: var(--psl-sage) !important; }
+a[href*="/categories/postgis/"]     { color: var(--psl-slate) !important; border-color: var(--psl-slate) !important; }
+a[href*="/categories/web-sig/"]     { color: var(--psl-brass-dark) !important; border-color: var(--psl-brass) !important; }
+.dark a[href*="/categories/web-sig/"] { color: var(--psl-brass) !important; }
+a[href*="/categories/kobotoolbox/"] { color: #8B5CF6 !important; border-color: #8B5CF6 !important; }
+
+/* ---------------------------------------------------------
+   PAGES DE LISTE / ARCHIVES (catégories, tags)
+   --------------------------------------------------------- */
+.page-header {
+  border-bottom: 2px solid var(--psl-brass);
+  padding-bottom: 1rem;
+  margin-bottom: 1.6rem;
+}
+
+.page-header h1 {
+  font-size: clamp(1.7rem, 3.5vw, 2.3rem);
+}
+
+.page-header .first-entry-image,
+.page-header .post-description {
+  color: var(--secondary);
+}
+
+.pagination a {
+  font-family: 'JetBrains Mono', monospace;
+  border: 1px solid var(--psl-brass-dark);
+  border-radius: 4px;
+}
+
+.pagination a:hover {
+  background: var(--psl-brass);
+  color: #fff !important;
+}
+
+/* ---------------------------------------------------------
+   FOOTER
+   --------------------------------------------------------- */
+.psl-footer {
+  background: var(--psl-ink);
+  color: #C7D0D8;
+  margin-top: 3.5rem;
+  border-top: 1px solid var(--psl-brass-dark);
+}
+
+.psl-footer__inner {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 2.4rem 1.5rem 1.8rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  justify-content: space-between;
+}
+
+.psl-footer__brand { max-width: 320px; }
+
+.psl-footer__mark {
+  font-family: 'Fraunces', serif;
+  font-weight: 700;
+  font-size: 1.15rem;
+  color: #fff;
+}
+
+.psl-footer__brand p {
+  margin: 0.35rem 0 0;
+  font-size: 0.85rem;
+  color: #8FA0AE;
+  line-height: 1.5;
+}
+
+.psl-footer__layers {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.82rem;
+}
+
+.psl-footer__layers a {
+  color: #C7D0D8;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.psl-footer__layers a::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  display: inline-block;
+}
+
+.psl-footer__layers a[data-layer="python"]::before { background: var(--psl-sage); }
+.psl-footer__layers a[data-layer="postgis"]::before { background: var(--psl-slate); }
+.psl-footer__layers a[data-layer="websig"]::before { background: var(--psl-brass); }
+.psl-footer__layers a[data-layer="kobo"]::before { background: #8B5CF6; }
+
+.psl-footer__layers a:hover { color: var(--psl-brass); }
+
+.psl-footer__meta {
+  font-size: 0.78rem;
+  color: #6E8493;
+  align-self: flex-end;
+}
+
+.psl-footer__meta a { color: #8FA0AE; text-decoration: none; }
+.psl-footer__meta a:hover { color: var(--psl-brass); text-decoration: underline; }
+
+.psl-footer__sep { margin: 0 0.4rem; }
+
+@media (max-width: 600px) {
+  .psl-footer__inner { flex-direction: column; gap: 1.4rem; }
+  .psl-footer__meta { align-self: flex-start; }
+}
+
+/* ---------------------------------------------------------
+   FORMULAIRE DE CONTACT
+   --------------------------------------------------------- */
+.psl-contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  max-width: 480px;
+  margin: 1.5rem 0;
+}
+
+.psl-contact-form label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--secondary);
+  margin-top: 0.6rem;
+}
+
+.psl-contact-form input,
+.psl-contact-form textarea {
+  font-family: 'Public Sans', sans-serif;
+  font-size: 0.95rem;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--entry);
+  color: var(--content);
+}
+
+.psl-contact-form input:focus,
+.psl-contact-form textarea:focus {
+  outline: none;
+  border-color: var(--psl-brass);
+  box-shadow: 0 0 0 3px rgba(192,138,62,0.18);
+}
+
+.psl-contact-form button {
+  margin-top: 1rem;
+  align-self: flex-start;
+  background: var(--psl-brass-dark);
+  color: #fff;
+  border: none;
+  padding: 0.65rem 1.4rem;
+  font-family: 'Public Sans', sans-serif;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.psl-contact-form button:hover { background: var(--psl-brass); }
+
+.psl-contact-note {
+  font-size: 0.82rem;
+  color: var(--secondary);
+}
+
+/* ---------------------------------------------------------
+   ENCART PUBLICITAIRE (AdSense)
+   --------------------------------------------------------- */
+.psl-ad-slot {
+  margin: 2rem 0;
+  padding: 0.8rem;
+  border: 1px dashed var(--border);
+  border-radius: 6px;
+  background: var(--tertiary);
+}
+
+.psl-ad-slot__label {
+  display: block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--secondary);
+  margin-bottom: 0.5rem;
+  text-align: center;
+}

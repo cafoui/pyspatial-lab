@@ -1,0 +1,66 @@
+{{- /* Surcharge de partials/home_info.html du thème PaperMod */ -}}
+<div class="psl-hero">
+  <div class="psl-hero__contours" aria-hidden="true">
+    <svg viewBox="0 0 1200 400" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <g fill="none" stroke="#C08A3E" stroke-width="1">
+        <path d="M-50,60 C 150,20 350,100 550,60 S 950,20 1250,70" opacity="0.5"/>
+        <path d="M-50,120 C 180,80 380,160 580,120 S 980,80 1250,130" opacity="0.4"/>
+        <path d="M-50,180 C 200,140 400,220 600,180 S 1000,140 1250,190" opacity="0.55"/>
+        <path d="M-50,240 C 160,200 360,280 560,240 S 960,200 1250,250" opacity="0.35"/>
+        <path d="M-50,300 C 190,260 390,340 590,300 S 990,260 1250,310" opacity="0.45"/>
+      </g>
+    </svg>
+  </div>
+  <div class="psl-hero__inner">
+    <span class="psl-eyebrow">GÉOMATIQUE&nbsp;&middot;&nbsp;PYTHON&nbsp;&middot;&nbsp;SIG</span>
+    <h1>Py<em>Spatial</em> Lab</h1>
+    <p>
+      Analyses spatiales, automatisation Python, bases de données PostGIS et
+      cartographie interactive — un carnet de terrain pour la géomatique
+      appliquée.
+    </p>
+
+    <div class="psl-layers">
+      <div class="psl-layers__header">
+        <span>Panneau de couches</span>
+        <span>{{ len (where site.RegularPages "Type" "posts") }} articles</span>
+      </div>
+
+      <a href="{{ "categories/python/" | relURL }}" class="psl-layer">
+        <span class="psl-layer__box"></span>
+        <span class="psl-layer__swatch" style="background:#5C7A66"></span>
+        <span class="psl-layer__label">Python
+          <span class="psl-layer__desc">Automatisation & traitements SIG</span>
+        </span>
+        <span class="psl-layer-count">{{ len (where site.RegularPages "Params.categories" "intersect" (slice "Python")) }}</span>
+      </a>
+
+      <a href="{{ "categories/postgis/" | relURL }}" class="psl-layer">
+        <span class="psl-layer__box"></span>
+        <span class="psl-layer__swatch" style="background:#486074"></span>
+        <span class="psl-layer__label">PostGIS
+          <span class="psl-layer__desc">Bases de données spatiales</span>
+        </span>
+        <span class="psl-layer-count">{{ len (where site.RegularPages "Params.categories" "intersect" (slice "PostGIS")) }}</span>
+      </a>
+
+      <a href="{{ "categories/web-sig/" | relURL }}" class="psl-layer">
+        <span class="psl-layer__box"></span>
+        <span class="psl-layer__swatch" style="background:#C08A3E"></span>
+        <span class="psl-layer__label">Web-SIG
+          <span class="psl-layer__desc">Cartographie interactive</span>
+        </span>
+        <span class="psl-layer-count">{{ len (where site.RegularPages "Params.categories" "intersect" (slice "Web-SIG")) }}</span>
+      </a>
+
+      <a href="{{ "categories/kobotoolbox/" | relURL }}" class="psl-layer">
+        <span class="psl-layer__box"></span>
+        <span class="psl-layer__swatch" style="background:#8B5CF6"></span>
+        <span class="psl-layer__label">KoboToolbox
+          <span class="psl-layer__desc">Collecte de données terrain</span>
+        </span>
+        <span class="psl-layer-count">{{ len (where site.RegularPages "Params.categories" "intersect" (slice "KoboToolbox")) }}</span>
+      </a>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,14 @@
+{{- /* Utilisation dans un article : {{< pub slot="1234567890" >}}
+      Ne s'affiche que si params.adsenseClientID est renseigné dans hugo.yaml. */ -}}
+{{- with site.Params.adsenseClientID }}
+<div class="psl-ad-slot">
+  <span class="psl-ad-slot__label">Publicité</span>
+  <ins class="adsbygoogle"
+       style="display:block"
+       data-ad-client="{{ . }}"
+       data-ad-slot="{{ $.Get "slot" }}"
+       data-ad-format="auto"
+       data-full-width-responsive="true"></ins>
+  <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+</div>
+{{- end }}

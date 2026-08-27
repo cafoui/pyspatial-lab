@@ -1,0 +1,19 @@
+{{- /* Surcharge de partials/breadcrumbs.html du thème PaperMod */ -}}
+{{- if (and site.Params.ShowBreadCrumbs (not .IsHome)) }}
+<nav class="psl-breadcrumbs" aria-label="breadcrumbs">
+  <a href="{{ "/" | relLangURL }}">Accueil</a>
+  {{- $sections := split (strings.TrimSuffix "/" .RelPermalink) "/" -}}
+  {{- $partial := "" -}}
+  {{- range $i, $s := $sections -}}
+    {{- if ne $s "" -}}
+      {{- $partial = printf "%s/%s" $partial $s -}}
+      <span class="psl-breadcrumbs__sep">&rsaquo;</span>
+      {{- if eq (add $i 1) (len $sections) -}}
+        <span class="psl-breadcrumbs__current">{{ $.Title }}</span>
+      {{- else -}}
+        <a href="{{ $partial | relLangURL }}">{{ replace (strings.TrimPrefix "/" $partial) "-" " " | title }}</a>
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+</nav>
+{{- end }}

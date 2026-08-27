@@ -1,0 +1,26 @@
+{{- /* Surcharge de partials/footer.html du thème PaperMod */ -}}
+<footer class="psl-footer">
+  <div class="psl-footer__inner">
+    <div class="psl-footer__brand">
+      <span class="psl-footer__mark">PySpatial Lab</span>
+      <p>Géomatique appliquée &mdash; Python, PostGIS, Web-SIG, KoboToolbox.</p>
+    </div>
+
+    <nav class="psl-footer__layers" aria-label="Catégories">
+      <a href="{{ "categories/python/" | relURL }}" data-layer="python">Python</a>
+      <a href="{{ "categories/postgis/" | relURL }}" data-layer="postgis">PostGIS</a>
+      <a href="{{ "categories/web-sig/" | relURL }}" data-layer="websig">Web-SIG</a>
+      <a href="{{ "categories/kobotoolbox/" | relURL }}" data-layer="kobo">KoboToolbox</a>
+    </nav>
+
+    <div class="psl-footer__meta">
+      <span>&copy; {{ now.Year }} PySpatial Lab</span>
+      <span class="psl-footer__sep">&middot;</span>
+      <a href="{{ "contact/" | relURL }}">Contact</a>
+      <span class="psl-footer__sep">&middot;</span>
+      <a href="{{ "politique-de-confidentialite/" | relURL }}">Politique de confidentialité</a>
+      <span class="psl-footer__sep">&middot;</span>
+      <span>Construit avec Hugo &amp; PaperMod</span>
+    </div>
+  </div>
+</footer>

@@ -1,0 +1,8 @@
+{{- /* Surcharge de partials/extend_head.html — insère le script Google AdSense
+      uniquement si un identifiant éditeur est renseigné dans hugo.yaml
+      (params.adsenseClientID), pour éviter de charger le script tant que
+      le compte n'est pas encore validé. */ -}}
+{{- with site.Params.adsenseClientID }}
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={{ . }}"
+        crossorigin="anonymous"></script>
+{{- end }}

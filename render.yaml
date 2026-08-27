@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: pyspatial-lab
+    runtime: static
+    repo: https://github.com/cafoui/pyspatial-lab
+    branch: main
+    buildCommand: hugo --gc --minify --baseURL "$RENDER_EXTERNAL_URL"
+    staticPublishPath: public
+    envVars:
+      - key: HUGO_VERSION
+        value: 0.134.3
+    headers:
+      - path: /*
+        name: X-Frame-Options
+        value: SAMEORIGIN
