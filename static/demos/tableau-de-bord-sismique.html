@@ -9,77 +9,82 @@
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
 <style>
-  :root{
-    --ink:#0F2138; --ink-soft:#1B324E; --paper:#EDEFE9;
-    --brass:#C08A3E; --brass-dark:#A2712F;
-    --sage:#5C7A66; --slate:#486074; --crimson:#B33951;
-    --border:#2C4460;
+  :root {
+    --ink: #0F2138;
+    --ink-soft: #1B324E;
+    --paper: #EDEFE9;
+    --brass: #C08A3E;
+    --brass-dark: #A2712F;
+    --sage: #5C7A66;
+    --slate: #486074;
+    --crimson: #B33951;
+    --border: #2C4460;
   }
-  *{ box-sizing:border-box; }
-  html,body{ margin:0; padding:0; height:100%; font-family:'Public Sans',sans-serif; background:var(--ink); color:#EDEFE9; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; height: 100%; font-family: 'Public Sans', sans-serif; background: var(--ink); color: #EDEFE9; }
 
-  .psl-app{ display:flex; flex-direction:column; height:100vh; }
+  .psl-app { display: flex; flex-direction: column; height: 100vh; }
 
-  header.psl-bar{
-    background:var(--ink); border-bottom:1px solid var(--brass-dark);
-    padding:0.9rem 1.2rem; display:flex; align-items:baseline; gap:0.7rem; flex-wrap:wrap;
+  header.psl-bar {
+    background: var(--ink); border-bottom: 1px solid var(--brass-dark);
+    padding: 0.9rem 1.2rem; display: flex; align-items: baseline; gap: 0.7rem; flex-wrap: wrap;
   }
-  header.psl-bar h1{
-    font-family:'Fraunces',serif; font-size:1.15rem; margin:0; color:#fff; font-weight:700;
+  header.psl-bar h1 {
+    font-family: 'Fraunces', serif; font-size: 1.15rem; margin: 0; color: #fff; font-weight: 700;
   }
-  header.psl-bar span.tag{
-    font-family:'JetBrains Mono',monospace; font-size:0.72rem; letter-spacing:0.08em;
-    color:var(--brass); border:1px solid var(--brass-dark); padding:0.15rem 0.5rem; border-radius:3px;
-  }
-
-  .psl-body{ flex:1; display:flex; min-height:0; }
-
-  aside.psl-panel{
-    width:300px; flex-shrink:0; background:var(--ink-soft); border-right:1px solid var(--border);
-    padding:1.1rem; overflow-y:auto;
-  }
-  @media (max-width: 760px){
-    .psl-body{ flex-direction:column; }
-    aside.psl-panel{ width:100%; border-right:none; border-bottom:1px solid var(--border); max-height:44vh; }
+  header.psl-bar span.tag {
+    font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; letter-spacing: 0.08em;
+    color: var(--brass); border: 1px solid var(--brass-dark); padding: 0.15rem 0.5rem; border-radius: 3px;
   }
 
-  .psl-group{ margin-bottom:1.4rem; }
-  .psl-group h2{
-    font-family:'JetBrains Mono',monospace; font-size:0.7rem; letter-spacing:0.1em; text-transform:uppercase;
-    color:#8FA0AE; margin:0 0 0.6rem;
+  .psl-body { flex: 1; display: flex; min-height: 0; }
+
+  aside.psl-panel {
+    width: 300px; flex-shrink: 0; background: var(--ink-soft); border-right: 1px solid var(--border);
+    padding: 1.1rem; overflow-y: auto;
+  }
+  @media (max-width: 760px) {
+    .psl-body { flex-direction: column; }
+    aside.psl-panel { width: 100%; border-right: none; border-bottom: 1px solid var(--border); max-height: 44vh; }
   }
 
-  select.psl-select{
-    width:100%; padding:0.5rem 0.6rem; font-family:'Public Sans',sans-serif; font-size:0.9rem;
-    background:var(--ink); color:#EDEFE9; border:1px solid var(--border); border-radius:4px;
+  .psl-group { margin-bottom: 1.4rem; }
+  .psl-group h2 {
+    font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase;
+    color: #8FA0AE; margin: 0 0 0.6rem;
   }
 
-  .psl-mag-row{ display:flex; justify-content:space-between; font-family:'JetBrains Mono',monospace; font-size:0.8rem; color:#C7D0D8; margin-bottom:0.4rem; }
-  input[type="range"]{ width:100%; accent-color:var(--brass); }
-
-  .psl-stat{
-    background:var(--ink); border:1px solid var(--border); border-radius:6px; padding:0.8rem;
-    font-family:'JetBrains Mono',monospace;
+  select.psl-select {
+    width: 100%; padding: 0.5rem 0.6rem; font-family: 'Public Sans', sans-serif; font-size: 0.9rem;
+    background: var(--ink); color: #EDEFE9; border: 1px solid var(--border); border-radius: 4px;
   }
-  .psl-stat strong{ display:block; font-size:1.6rem; color:#fff; font-family:'Fraunces',serif; }
-  .psl-stat small{ color:#8FA0AE; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.06em; }
 
-  .psl-legend{ display:flex; flex-direction:column; gap:0.4rem; font-size:0.82rem; }
-  .psl-legend div{ display:flex; align-items:center; gap:0.5rem; }
-  .psl-legend .dot{ width:11px; height:11px; border-radius:50%; flex-shrink:0; border:1px solid rgba(255,255,255,0.3); }
+  .psl-mag-row { display: flex; justify-content: space-between; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: #C7D0D8; margin-bottom: 0.4rem; }
+  input[type="range"] { width: 100%; accent-color: var(--brass); }
 
-  #psl-status{ font-size:0.78rem; color:#8FA0AE; font-family:'JetBrains Mono',monospace; margin-top:0.5rem; min-height:1.1em; }
-
-  #map{ flex:1; background:#0b1926; }
-
-  .leaflet-popup-content-wrapper{
-    background:var(--ink-soft); color:#EDEFE9; border:1px solid var(--brass-dark); border-radius:6px;
+  .psl-stat {
+    background: var(--ink); border: 1px solid var(--border); border-radius: 6px; padding: 0.8rem;
+    font-family: 'JetBrains Mono', monospace;
   }
-  .leaflet-popup-tip{ background:var(--ink-soft); }
-  .psl-popup h3{ margin:0 0 0.3rem; font-family:'Fraunces',serif; font-size:1rem; }
-  .psl-popup table{ font-size:0.8rem; font-family:'JetBrains Mono',monospace; }
-  .psl-popup table td{ padding:0.1rem 0.4rem 0.1rem 0; color:#C7D0D8; }
-  .psl-popup a{ color:var(--brass); }
+  .psl-stat strong { display: block; font-size: 1.6rem; color: #fff; font-family: 'Fraunces', serif; }
+  .psl-stat small { color: #8FA0AE; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; }
+
+  .psl-legend { display: flex; flex-direction: column; gap: 0.4rem; font-size: 0.82rem; }
+  .psl-legend div { display: flex; align-items: center; gap: 0.5rem; }
+  .psl-legend .dot { width: 11px; height: 11px; border-radius: 50%; flex-shrink: 0; border: 1px solid rgba(255,255,255,0.3); }
+
+  #psl-status { font-size: 0.78rem; color: #8FA0AE; font-family: 'JetBrains Mono', monospace; margin-top: 0.5rem; min-height: 1.1em; }
+
+  #map { flex: 1; background: #0b1926; }
+
+  .leaflet-popup-content-wrapper {
+    background: var(--ink-soft); color: #EDEFE9; border: 1px solid var(--brass-dark); border-radius: 6px;
+  }
+  .leaflet-popup-tip { background: var(--ink-soft); }
+  .psl-popup h3 { margin: 0 0 0.3rem; font-family: 'Fraunces', serif; font-size: 1rem; }
+  .psl-popup table { font-size: 0.8rem; font-family: 'JetBrains Mono', monospace; }
+  .psl-popup table td { padding: 0.1rem 0.4rem 0.1rem 0; color: #C7D0D8; }
+  .psl-popup a { color: var(--brass); }
 </style>
 </head>
 <body>
@@ -135,7 +140,7 @@
       <div class="psl-group">
         <h2>Source</h2>
         <div style="font-size:0.78rem; color:#8FA0AE; line-height:1.5;">
-          Flux GeoJSON public de l'<a href="https://earthquake.usgs.gov/earthquake/feed/v1.0/geojson.php" style="color:var(--brass)" target="_blank" rel="noopener">USGS Earthquake Hazards Program</a>, sans clé d'API.
+          Flux GeoJSON public de l'<a href="https://earthquake.usgs.gov/earthquake/feed/v1.0/geojson.php" style="color:var(--brass)" target="_blank" rel="noopener">USGS Earthquake Hazards Program</a>.
         </div>
       </div>
 
@@ -149,21 +154,21 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
   // ---------------------------------------------------------------
-  // 1) Initialisation de la carte
+  // 1) Carte (Esri Dark)
   // ---------------------------------------------------------------
   const map = L.map('map', { worldCopyJump: true }).setView([15, 10], 2);
 
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-    attribution: '&copy; OpenStreetMap &copy; CARTO',
-    maxZoom: 18
+  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+    attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ',
+    maxZoom: 16
   }).addTo(map);
 
   const markersLayer = L.layerGroup().addTo(map);
 
   // ---------------------------------------------------------------
-  // 2) État de l'application
+  // 2) État & Éléments
   // ---------------------------------------------------------------
-  let rawFeatures = [];   // toutes les features renvoyées par l'API pour la période choisie
+  let rawFeatures = [];
   const els = {
     period: document.getElementById('period'),
     mag: document.getElementById('magFilter'),
@@ -173,10 +178,15 @@
     status: document.getElementById('psl-status'),
   };
 
-  const FEED_BASE = 'https://earthquake.usgs.gov/earthquake/feed/v1.0/summary/all_';
+  const FEED_FILES = {
+    hour: 'all_hour.geojson',
+    day: 'all_day.geojson',
+    week: 'all_week.geojson',
+    month: 'all_month.geojson'
+  };
 
   // ---------------------------------------------------------------
-  // 3) Style des marqueurs selon la magnitude
+  // 3) Styles des Marqueurs
   // ---------------------------------------------------------------
   function colorForMag(m) {
     if (m >= 6) return '#B33951';
@@ -189,27 +199,60 @@
   }
 
   // ---------------------------------------------------------------
-  // 4) Récupération des données (appelée au chargement et à chaque
-  //    changement de période)
+  // 4) Stratégie Multi-Flux robuste
   // ---------------------------------------------------------------
-  async function loadData(period) {
+  async function loadData(periodKey) {
     els.status.textContent = 'Chargement des données…';
+    const fileName = FEED_FILES[periodKey] || 'all_day.geojson';
+    const directUrl = `https://earthquake.usgs.gov/earthquake/feed/v1.0/summary/${fileName}`;
+
+    // 1. Essai Direct (Fonctionne parfaitement sur serveur web/HTTP)
     try {
-      const res = await fetch(`${FEED_BASE}${period}.geojson`);
-      if (!res.ok) throw new Error('Réponse réseau invalide');
-      const data = await res.json();
-      rawFeatures = data.features || [];
-      els.status.textContent = `Mis à jour : ${new Date().toLocaleTimeString('fr-FR')}`;
-      render();
-    } catch (err) {
-      els.status.textContent = "Impossible de charger les données (hors-ligne ?)";
-      console.error(err);
+      const res = await fetch(directUrl);
+      if (res.ok) {
+        const data = await res.json();
+        return processData(data);
+      }
+    } catch (e) {
+      console.warn("Direct fetch bloqué, basculement sur AllOrigins...");
     }
+
+    // 2. Essai via Proxy AllOrigins (Format JSONP)
+    try {
+      const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(directUrl)}`;
+      const resProxy = await fetch(proxyUrl);
+      if (resProxy.ok) {
+        const proxyData = await resProxy.json();
+        const parsedGeoJSON = JSON.parse(proxyData.contents);
+        return processData(parsedGeoJSON);
+      }
+    } catch (e) {
+      console.warn("Proxy AllOrigins échoué, essai via l'API Web Service USGS...");
+    }
+
+    // 3. Essai via l'API Webservice Directe (Non soumise aux mêmes restrictions CORS)
+    try {
+      const apiEndpoint = `https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&orderby=time&limit=2000`;
+      const resApi = await fetch(apiEndpoint);
+      if (resApi.ok) {
+        const dataApi = await resApi.json();
+        return processData(dataApi);
+      }
+    } catch (e) {
+      console.error("Tous les canaux d'accès ont échoué.", e);
+    }
+
+    els.status.textContent = "Erreur de connexion aux serveurs USGS.";
+  }
+
+  function processData(data) {
+    rawFeatures = data.features || [];
+    els.status.textContent = `Mis à jour : ${new Date().toLocaleTimeString('fr-FR')}`;
+    render();
   }
 
   // ---------------------------------------------------------------
-  // 5) Rendu : applique le filtre de magnitude sur les données déjà
-  //    chargées, sans refaire d'appel réseau
+  // 5) Rendu
   // ---------------------------------------------------------------
   function render() {
     const threshold = parseFloat(els.mag.value);
@@ -235,11 +278,11 @@
         <div class="psl-popup">
           <h3>${f.properties.place || 'Lieu inconnu'}</h3>
           <table>
-            <tr><td>Magnitude</td><td><strong>${mag.toFixed(1)}</strong></td></tr>
-            <tr><td>Profondeur</td><td>${depth.toFixed(1)} km</td></tr>
+            <tr><td>Magnitude</td><td><strong>${mag !== null ? mag.toFixed(1) : 'N/A'}</strong></td></tr>
+            <tr><td>Profondeur</td><td>${depth !== undefined ? depth.toFixed(1) : '0'} km</td></tr>
             <tr><td>Date</td><td>${date}</td></tr>
           </table>
-          <a href="${f.properties.url}" target="_blank" rel="noopener">Voir la fiche USGS →</a>
+          <a href="${f.properties.url}" target="_blank" rel="noopener">Fiche USGS →</a>
         </div>
       `);
 
@@ -251,7 +294,7 @@
   }
 
   // ---------------------------------------------------------------
-  // 6) Écouteurs d'événements pour les filtres dynamiques
+  // 6) Écouteurs d'événements
   // ---------------------------------------------------------------
   els.period.addEventListener('change', () => loadData(els.period.value));
 
