@@ -1,6 +1,6 @@
 ---
 title: "Créer un tableau de bord cartographique interactif avec des filtres dynamiques (Leaflet + JS)"
-date: 2026-08-27T10:00:00+01:00
+date: 2026-08-20T10:00:00+01:00
 draft: false
 categories: ["Web-SIG"]
 tags: ["leaflet", "web-sig", "javascript", "geojson", "opendata"]
