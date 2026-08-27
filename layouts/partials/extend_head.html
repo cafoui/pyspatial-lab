@@ -1,7 +1,15 @@
-{{- /* Surcharge de partials/extend_head.html — insère le script Google AdSense
-      uniquement si un identifiant éditeur est renseigné dans hugo.yaml
-      (params.adsenseClientID), pour éviter de charger le script tant que
-      le compte n'est pas encore validé. */ -}}
+{{- /* Surcharge de partials/extend_head.html.
+      1) Polices Google Fonts, chargées ici (et non via @import dans le CSS)
+         car Hugo concatène assets/css/extended/*.css APRÈS le CSS du
+         thème — un @import qui ne se retrouve pas tout en haut du fichier
+         final est silencieusement ignoré par le navigateur.
+      2) Script Google AdSense, uniquement si un identifiant éditeur est
+         renseigné dans hugo.yaml (params.adsenseClientID). */ -}}
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
 {{- with site.Params.adsenseClientID }}
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={{ . }}"
         crossorigin="anonymous"></script>
