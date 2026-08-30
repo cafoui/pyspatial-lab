@@ -18,7 +18,7 @@ collaboration ? N'hésitez pas à me contacter.
 
 ## Formulaire de contact
 
-<form class="psl-contact-form" action="https://formspree.io/f/VOTRE-ID-FORMSPREE" method="POST">
+<form class="psl-contact-form" action="https://formspree.io/f/xnpqjjdk" method="POST">
   <label for="name">Nom</label>
   <input type="text" id="name" name="name" required>
 
@@ -31,9 +31,4 @@ collaboration ? N'hésitez pas à me contacter.
   <button type="submit">Envoyer</button>
 </form>
 
-<p class="psl-contact-note">
-  Ce formulaire est géré par <a href="https://formspree.io" target="_blank" rel="noopener">Formspree</a>
-  (gratuit jusqu'à 50 messages/mois). Créez un compte sur formspree.io, un
-  formulaire, puis remplacez <code>VOTRE-ID-FORMSPREE</code> ci-dessus par
-  l'identifiant fourni.
-</p>
+
