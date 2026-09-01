@@ -27,7 +27,7 @@ params:
   # Identifiant éditeur Google AdSense (format "ca-pub-XXXXXXXXXXXXXXXX").
   # Laissez vide tant que votre compte AdSense n'est pas approuvé —
   # le script ne se charge que si cette valeur est renseignée.
-  adsenseClientID: ""
+  adsenseClientID: "ca-pub-8795523410905099"
   DateFormat: "2 January 2006"
   defaultTheme: auto
   disableThemeToggle: false
