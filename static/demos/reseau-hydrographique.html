@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Réseau hydrographique — Bohicon, Bénin</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --ink:#0F2138; --ink-soft:#1B324E; --paper:#EDEFE9;
+    --brass:#C08A3E; --brass-dark:#A2712F;
+    --sage:#5C7A66; --slate:#486074; --water:#3B82C4; --water-deep:#1E5A8C;
+    --border:#2C4460;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; height:100%; font-family:'Public Sans',sans-serif; background:var(--ink); color:#EDEFE9; }
+
+  .hy-app{ display:flex; flex-direction:column; height:100vh; }
+
+  header.hy-bar{
+    background:var(--ink); border-bottom:1px solid var(--brass-dark);
+    padding:0.9rem 1.2rem; display:flex; align-items:baseline; gap:0.7rem; flex-wrap:wrap;
+  }
+  header.hy-bar h1{ font-family:'Fraunces',serif; font-size:1.15rem; margin:0; color:#fff; font-weight:700; }
+  header.hy-bar span.tag{
+    font-family:'JetBrains Mono',monospace; font-size:0.72rem; letter-spacing:0.08em;
+    color:var(--brass); border:1px solid var(--brass-dark); padding:0.15rem 0.5rem; border-radius:3px;
+  }
+
+  .hy-body{ flex:1; display:flex; min-height:0; }
+
+  aside.hy-panel{
+    width:300px; flex-shrink:0; background:var(--ink-soft); border-right:1px solid var(--border);
+    padding:1.1rem; overflow-y:auto;
+  }
+  @media (max-width: 780px){
+    .hy-body{ flex-direction:column; }
+    aside.hy-panel{ width:100%; border-right:none; border-bottom:1px solid var(--border); max-height:48vh; }
+  }
+
+  .hy-group{ margin-bottom:1.3rem; }
+  .hy-group h2{
+    font-family:'JetBrains Mono',monospace; font-size:0.7rem; letter-spacing:0.1em; text-transform:uppercase;
+    color:#8FA0AE; margin:0 0 0.6rem;
+  }
+
+  label.hy-toggle{ display:flex; align-items:center; gap:0.5rem; font-size:0.9rem; margin-bottom:0.5rem; cursor:pointer; }
+  label.hy-toggle input{ accent-color:var(--water); }
+
+  .hy-stats{ display:flex; gap:0.6rem; }
+  .hy-stat{
+    flex:1; background:var(--ink); border:1px solid var(--border); border-radius:6px; padding:0.7rem;
+    font-family:'JetBrains Mono',monospace; text-align:center;
+  }
+  .hy-stat strong{ display:block; font-size:1.3rem; color:#fff; font-family:'Fraunces',serif; }
+  .hy-stat small{ color:#8FA0AE; font-size:0.62rem; text-transform:uppercase; letter-spacing:0.04em; }
+
+  .hy-legend{ display:flex; flex-direction:column; gap:0.45rem; font-size:0.82rem; }
+  .hy-legend div{ display:flex; align-items:center; gap:0.5rem; }
+  .hy-legend .line{ width:22px; height:0; flex-shrink:0; }
+  .hy-legend .swatch{ width:16px; height:12px; border-radius:2px; flex-shrink:0; }
+
+  .hy-note{ font-size:0.78rem; color:#8FA0AE; line-height:1.5; }
+
+  #map{ flex:1; }
+
+  .leaflet-popup-content-wrapper{ background:var(--ink-soft); color:#EDEFE9; border:1px solid var(--brass-dark); border-radius:6px; }
+  .leaflet-popup-tip{ background:var(--ink-soft); }
+  .hy-popup h3{ margin:0 0 0.3rem; font-family:'Fraunces',serif; font-size:0.95rem; }
+  .hy-popup table{ font-size:0.78rem; font-family:'JetBrains Mono',monospace; }
+  .hy-popup table td{ padding:0.1rem 0.4rem 0.1rem 0; color:#C7D0D8; }
+</style>
+</head>
+<body>
+
+<div class="hy-app">
+
+  <header class="hy-bar">
+    <h1>Réseau hydrographique &amp; bassin versant</h1>
+    <span class="tag">DONNÉES D'EXEMPLE · RÉGION DE BOHICON, BÉNIN</span>
+  </header>
+
+  <div class="hy-body">
+
+    <aside class="hy-panel">
+
+      <div class="hy-group">
+        <h2>Couches</h2>
+        <label class="hy-toggle"><input type="checkbox" id="toggleBassin" checked> Bassin versant</label>
+        <label class="hy-toggle"><input type="checkbox" id="toggleReseau" checked> Réseau hydrographique</label>
+        <label class="hy-toggle"><input type="checkbox" id="toggleExutoire" checked> Exutoire</label>
+      </div>
+
+      <div class="hy-group">
+        <div class="hy-stats">
+          <div class="hy-stat">
+            <strong id="statSuperficie">–</strong>
+            <small>km² de bassin</small>
+          </div>
+          <div class="hy-stat">
+            <strong id="statLongueur">–</strong>
+            <small>km de cours d'eau</small>
+          </div>
+        </div>
+      </div>
+
+      <div class="hy-group">
+        <h2>Légende — ordre de Strahler</h2>
+        <div class="hy-legend">
+          <div><span class="line" style="border-top:2px solid #9FC6E8"></span> Ordre 1 (têtes de bassin)</div>
+          <div><span class="line" style="border-top:4px solid #3B82C4"></span> Ordre 2 (affluents)</div>
+          <div><span class="line" style="border-top:6px solid #1E5A8C"></span> Ordre 3 (cours principal)</div>
+          <div><span class="swatch" style="background:rgba(72,96,116,0.35); border:1px solid #486074"></span> Bassin versant</div>
+        </div>
+      </div>
+
+      <div class="hy-group">
+        <h2>À propos de ces données</h2>
+        <p class="hy-note">
+          Réseau et bassin d'exemple, construits pour illustrer la méthode
+          décrite dans l'article. Pour tes propres données, remplace
+          <code>reseau-hydrographique-bohicon.geojson</code> par le résultat
+          de ton propre traitement RichDEM / pysheds (voir l'article associé).
+        </p>
+      </div>
+
+    </aside>
+
+    <div id="map"></div>
+
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+  // ---------------------------------------------------------------
+  // 1) Carte de fond
+  // ---------------------------------------------------------------
+  const map = L.map('map').setView([7.19, 2.06], 11);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    maxZoom: 19
+  }).addTo(map);
+  document.querySelector('#map').insertAdjacentHTML('beforeend', '');
+  document.querySelector('.leaflet-tile-pane') && (document.querySelector('.leaflet-tile-pane').style.filter =
+    'invert(1) hue-rotate(180deg) brightness(0.95) contrast(0.9) saturate(0.8)');
+
+  const bassinLayer = L.layerGroup().addTo(map);
+  const reseauLayer = L.layerGroup().addTo(map);
+  const exutoireLayer = L.layerGroup().addTo(map);
+
+  // ---------------------------------------------------------------
+  // 2) Style du réseau selon l'ordre de Strahler
+  // ---------------------------------------------------------------
+  function styleCoursEau(order) {
+    if (order >= 3) return { color: '#1E5A8C', weight: 5 };
+    if (order === 2) return { color: '#3B82C4', weight: 3.5 };
+    return { color: '#9FC6E8', weight: 2 };
+  }
+
+  // ---------------------------------------------------------------
+  // 3) Charger les données et répartir par type de feature
+  // ---------------------------------------------------------------
+  fetch('./data/reseau-hydrographique-bohicon.geojson')
+    .then(res => res.json())
+    .then(geojson => {
+      let longueurTotale = 0;
+      let superficie = 0;
+
+      geojson.features.forEach(f => {
+        const p = f.properties;
+
+        if (p.type === 'bassin_versant') {
+          superficie = p.superficie_km2;
+          L.geoJSON(f, {
+            style: { color: '#486074', weight: 2, fillColor: '#486074', fillOpacity: 0.15 }
+          }).addTo(bassinLayer);
+        }
+
+        if (p.type === 'cours_eau') {
+          longueurTotale += p.longueur_km;
+          L.geoJSON(f, { style: styleCoursEau(p.strahler_order) })
+            .bindPopup(`
+              <div class="hy-popup">
+                <h3>${p.nom}</h3>
+                <table>
+                  <tr><td>Ordre de Strahler</td><td>${p.strahler_order}</td></tr>
+                  <tr><td>Longueur</td><td>${p.longueur_km} km</td></tr>
+                </table>
+              </div>
+            `)
+            .addTo(reseauLayer);
+        }
+
+        if (p.type === 'exutoire') {
+          L.circleMarker([f.geometry.coordinates[1], f.geometry.coordinates[0]], {
+            radius: 7, color: '#0F2138', weight: 2, fillColor: '#C08A3E', fillOpacity: 1
+          }).bindPopup('<div class="hy-popup"><h3>Exutoire</h3><p>Point de convergence du bassin versant</p></div>')
+            .addTo(exutoireLayer);
+        }
+      });
+
+      document.getElementById('statSuperficie').textContent = superficie.toLocaleString('fr-FR');
+      document.getElementById('statLongueur').textContent = longueurTotale.toFixed(1).toLocaleString('fr-FR');
+    });
+
+  // ---------------------------------------------------------------
+  // 4) Contrôles d'affichage des couches
+  // ---------------------------------------------------------------
+  document.getElementById('toggleBassin').addEventListener('change', e => {
+    map[e.target.checked ? 'addLayer' : 'removeLayer'](bassinLayer);
+  });
+  document.getElementById('toggleReseau').addEventListener('change', e => {
+    map[e.target.checked ? 'addLayer' : 'removeLayer'](reseauLayer);
+  });
+  document.getElementById('toggleExutoire').addEventListener('change', e => {
+    map[e.target.checked ? 'addLayer' : 'removeLayer'](exutoireLayer);
+  });
+</script>
+
+</body>
+</html>
