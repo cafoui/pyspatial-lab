@@ -161,12 +161,15 @@
   }
 
   // ---------------------------------------------------------------
-  // 3) Charger les fichiers GeoJSON séparés
+  // 3) Charger les fichiers GeoJSON séparés dans le dossier data/
   // ---------------------------------------------------------------
 
   // Charger le Bassin Versant
-  fetch('./bassin_versant.geojson')
-    .then(res => res.json())
+  fetch('./data/bassin_versant.geojson')
+    .then(res => {
+      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+      return res.json();
+    })
     .then(geojson => {
       let superficie = 0;
 
@@ -190,8 +193,11 @@
     .catch(err => console.error("Erreur au chargement de bassin_versant.geojson:", err));
 
   // Charger le Réseau Hydrographique
-  fetch('./reseau_hydrographique.geojson')
-    .then(res => res.json())
+  fetch('./data/reseau_hydrographique.geojson')
+    .then(res => {
+      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+      return res.json();
+    })
     .then(geojson => {
       let longueurTotale = 0;
 
