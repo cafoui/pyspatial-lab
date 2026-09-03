@@ -44,8 +44,7 @@ justement pour éviter ce piège.
 
 ## 1. Préparer le MNT côté Python
 
-Avec `rasterio` (l'outil recommandé — voir la note en fin d'article sur
-l'alternative utilisée pour cette démonstration précise) :
+
 
 ```python
 import rasterio
