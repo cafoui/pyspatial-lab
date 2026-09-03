@@ -26,14 +26,6 @@ indépendamment et les statistiques de superficie et de longueur totale.
 *(Si l'aperçu ne s'affiche pas dans ton lecteur de flux, [ouvre-le
 directement](/demos/reseau-hydrographique.html).)*
 
-⚠️ **Sur les données de cette carte** : pour que la démonstration soit
-immédiatement visible sans dépendre d'un calcul externe, la carte
-ci-dessus utilise un réseau hydrographique et un bassin versant
-**reconstitués à la main**, plausibles pour la région de Bohicon mais pas
-issus d'un calcul réel. La suite de l'article explique précisément
-comment produire les vraies données à partir d'un MNT, pour remplacer ce
-fichier d'exemple par un résultat calculé.
-
 ## Le principe, en trois étapes
 
 1. **Combler les dépressions** du MNT — un relief brut contient souvent
