@@ -192,13 +192,6 @@ visualiseur 3D web, sans rien coder à la main.
   Three.js au format glTF plutôt que de le reconstruire à chaque fois côté
   navigateur.
 
-> **Note technique sur cet article** : la préparation des données
-> ci-dessus utilise `rasterio`, l'outil recommandé pour un usage normal.
-> Cette démonstration précise a été produite avec `tifffile` + `scipy` +
-> `Pillow` à la place, `rasterio` n'étant pas disponible dans
-> l'environnement utilisé pour cet article — le résultat final (la
-> heightmap PNG) est strictement identique quelle que soit la méthode
-> utilisée pour y arriver.
 
 Un relief 3D bien construit n'est jamais qu'une heightmap et un maillage
 déformé — la vraie difficulté, comme souvent en cartographie, est de
