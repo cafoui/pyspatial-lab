@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Relief 3D — Natitingou, Bénin</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --ink:#0F2138; --ink-soft:#1B324E; --paper:#EDEFE9;
+    --brass:#C08A3E; --brass-dark:#A2712F;
+    --sage:#5C7A66; --slate:#486074;
+    --border:#2C4460;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; height:100%; font-family:'Public Sans',sans-serif; background:var(--ink); color:#EDEFE9; overflow:hidden; }
+
+  .r3-app{ display:flex; flex-direction:column; height:100vh; }
+
+  header.r3-bar{
+    background:var(--ink); border-bottom:1px solid var(--brass-dark);
+    padding:0.9rem 1.2rem; display:flex; align-items:baseline; gap:0.7rem; flex-wrap:wrap; z-index:2;
+  }
+  header.r3-bar h1{ font-family:'Fraunces',serif; font-size:1.15rem; margin:0; color:#fff; font-weight:700; }
+  header.r3-bar span.tag{
+    font-family:'JetBrains Mono',monospace; font-size:0.72rem; letter-spacing:0.08em;
+    color:var(--brass); border:1px solid var(--brass-dark); padding:0.15rem 0.5rem; border-radius:3px;
+  }
+
+  .r3-body{ flex:1; position:relative; min-height:0; }
+  #canvas-wrap{ position:absolute; inset:0; }
+  canvas{ display:block; }
+
+  .r3-panel{
+    position:absolute; top:1rem; left:1rem; width:270px;
+    background:rgba(27,50,78,0.92); border:1px solid var(--border); border-radius:8px;
+    padding:1rem; backdrop-filter:blur(4px);
+  }
+  .r3-panel h2{
+    font-family:'JetBrains Mono',monospace; font-size:0.68rem; letter-spacing:0.1em; text-transform:uppercase;
+    color:#8FA0AE; margin:0 0 0.6rem;
+  }
+  .r3-row{ margin-bottom:1rem; }
+  .r3-row label{ display:flex; justify-content:space-between; font-size:0.82rem; margin-bottom:0.35rem; }
+  .r3-row span.val{ font-family:'JetBrains Mono',monospace; color:var(--brass); }
+  input[type="range"]{ width:100%; accent-color:var(--brass); }
+
+  .r3-toggles{ display:flex; gap:0.5rem; }
+  .r3-toggles button{
+    flex:1; background:var(--ink); color:#EDEFE9; border:1px solid var(--border); border-radius:4px;
+    padding:0.4rem; font-family:'Public Sans',sans-serif; font-size:0.8rem; cursor:pointer;
+  }
+  .r3-toggles button.active{ background:var(--brass-dark); border-color:var(--brass); }
+
+  .r3-warning{
+    position:absolute; bottom:1rem; left:1rem; right:1rem; max-width:640px;
+    background:rgba(15,33,56,0.92); border:1px solid var(--brass-dark); border-radius:8px;
+    padding:0.7rem 0.9rem; font-size:0.78rem; color:#C7D0D8; line-height:1.5;
+  }
+  .r3-warning strong{ color:var(--brass); }
+
+  .r3-loading{
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    font-family:'JetBrains Mono',monospace; color:#8FA0AE; font-size:0.85rem;
+  }
+</style>
+</head>
+<body>
+
+<div class="r3-app">
+  <header class="r3-bar">
+    <h1>Relief 3D — chaîne de l'Atacora, Natitingou</h1>
+    <span class="tag">MNT RÉEL · CHAÎNE DE L'ATACORA</span>
+  </header>
+
+  <div class="r3-body">
+    <div id="canvas-wrap"></div>
+    <div class="r3-loading" id="loading">Chargement du relief…</div>
+
+    <div class="r3-panel" id="panel" style="display:none;">
+      <h2>Exagération verticale</h2>
+      <div class="r3-row">
+        <label>Facteur <span class="val" id="exagVal">15×</span></label>
+        <input type="range" id="exag" min="1" max="40" step="1" value="15">
+      </div>
+
+      <h2>Affichage</h2>
+      <div class="r3-toggles">
+        <button id="btnSolid" class="active">Plein</button>
+        <button id="btnWire">Filaire</button>
+      </div>
+    </div>
+
+    <div class="r3-warning">
+      ⚠️ <strong>Le relief réel de cette zone est presque plat</strong> (480 m
+      de dénivelé sur ~61,5 km) — sans exagération verticale, il serait
+      quasiment invisible en 3D. Le facteur affiché ci-dessus n'est jamais
+      caché : ajuste-le, mais garde à l'esprit qu'un relief "spectaculaire"
+      ici est toujours un effet de mise en scène, pas la réalité du terrain.
+    </div>
+  </div>
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+const wrap = document.getElementById('canvas-wrap');
+const loading = document.getElementById('loading');
+const panel = document.getElementById('panel');
+
+// ---------------------------------------------------------------
+// 1) Scène, caméra, renderer
+// ---------------------------------------------------------------
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x0F2138);
+
+const camera = new THREE.PerspectiveCamera(45, wrap.clientWidth / wrap.clientHeight, 0.1, 1000);
+camera.position.set(60, 55, 90);
+
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(wrap.clientWidth, wrap.clientHeight);
+renderer.setPixelRatio(window.devicePixelRatio);
+wrap.appendChild(renderer.domElement);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.target.set(0, 0, 0);
+
+scene.add(new THREE.AmbientLight(0xffffff, 0.55));
+const sun = new THREE.DirectionalLight(0xfff2d9, 1.1);
+sun.position.set(-80, 120, 60);
+scene.add(sun);
+
+// ---------------------------------------------------------------
+// 2) Charger la heightmap (PNG en niveaux de gris) + ses métadonnées
+// ---------------------------------------------------------------
+let terrainMesh, heights, gridW, gridH, elevMin, elevMax;
+const PLANE_WIDTH = 100;
+let PLANE_DEPTH = 61.5;
+
+async function init() {
+  const meta = await (await fetch('./data/mnt-natitingou-heightmap-meta.json')).json();
+  gridW = meta.width; gridH = meta.height;
+  elevMin = meta.elev_min; elevMax = meta.elev_max;
+  PLANE_DEPTH = PLANE_WIDTH * (gridH / gridW);
+
+  const img = await loadImage('./data/mnt-natitingou-heightmap.png');
+  heights = readGrayscale(img, gridW, gridH);
+
+  buildTerrain(15);
+
+  loading.style.display = 'none';
+  panel.style.display = 'block';
+  animate();
+}
+
+function loadImage(src) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+    img.src = src;
+  });
+}
+
+function readGrayscale(img, w, h) {
+  const c = document.createElement('canvas');
+  c.width = w; c.height = h;
+  const ctx = c.getContext('2d');
+  ctx.drawImage(img, 0, 0, w, h);
+  const data = ctx.getImageData(0, 0, w, h).data;
+  const arr = new Float32Array(w * h);
+  for (let i = 0; i < w * h; i++) arr[i] = data[i * 4] / 255; // 0..1
+  return arr;
+}
+
+// ---------------------------------------------------------------
+// 3) Construire le maillage 3D, coloré par altitude (teinte hypsométrique)
+// ---------------------------------------------------------------
+function colorForElevation(t) {
+  // t entre 0 et 1 -> dégradé sauge -> laiton -> crème, cohérent avec le site
+  const stops = [
+    [0.00, [92, 122, 102]],
+    [0.55, [192, 138, 62]],
+    [1.00, [237, 239, 233]],
+  ];
+  for (let i = 0; i < stops.length - 1; i++) {
+    const [t0, c0] = stops[i], [t1, c1] = stops[i + 1];
+    if (t >= t0 && t <= t1) {
+      const f = (t - t0) / (t1 - t0);
+      return [
+        Math.round(c0[0] + f * (c1[0] - c0[0])),
+        Math.round(c0[1] + f * (c1[1] - c0[1])),
+        Math.round(c0[2] + f * (c1[2] - c0[2])),
+      ];
+    }
+  }
+  return stops[stops.length - 1][1];
+}
+
+function buildTerrain(exaggeration) {
+  if (terrainMesh) scene.remove(terrainMesh);
+
+  const geometry = new THREE.PlaneGeometry(PLANE_WIDTH, PLANE_DEPTH, gridW - 1, gridH - 1);
+  geometry.rotateX(-Math.PI / 2);
+
+  const pos = geometry.attributes.position;
+  const colors = new Float32Array(pos.count * 3);
+
+  // Échelle réelle : PLANE_WIDTH unités représentent l'étendue est-ouest du MNT
+  const realWidthKm = 61.5;
+  const unitsPerKm = PLANE_WIDTH / realWidthKm;
+  const exagUnits = (exaggeration * unitsPerKm) / 1000; // m -> unités de scène, avec exagération
+
+  for (let j = 0; j < gridH; j++) {
+    for (let i = 0; i < gridW; i++) {
+      const idx = j * gridW + i;
+      const t = heights[idx];                       // 0..1
+      const elevM = elevMin + t * (elevMax - elevMin);
+      pos.setY(idx, elevM * exagUnits);
+
+      const [r, g, b] = colorForElevation(t);
+      colors[idx * 3] = r / 255;
+      colors[idx * 3 + 1] = g / 255;
+      colors[idx * 3 + 2] = b / 255;
+    }
+  }
+  geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+  geometry.computeVertexNormals();
+
+  const material = new THREE.MeshStandardMaterial({
+    vertexColors: true,
+    flatShading: false,
+    wireframe: currentWire,
+    roughness: 0.85,
+    metalness: 0.05,
+  });
+
+  terrainMesh = new THREE.Mesh(geometry, material);
+  scene.add(terrainMesh);
+}
+
+// ---------------------------------------------------------------
+// 4) Contrôles (exagération, filaire/plein)
+// ---------------------------------------------------------------
+let currentWire = false;
+const exagInput = document.getElementById('exag');
+const exagVal = document.getElementById('exagVal');
+exagInput.addEventListener('input', () => {
+  exagVal.textContent = exagInput.value + '×';
+  buildTerrain(parseFloat(exagInput.value));
+});
+
+document.getElementById('btnSolid').addEventListener('click', (e) => {
+  currentWire = false;
+  terrainMesh.material.wireframe = false;
+  e.target.classList.add('active');
+  document.getElementById('btnWire').classList.remove('active');
+});
+document.getElementById('btnWire').addEventListener('click', (e) => {
+  currentWire = true;
+  terrainMesh.material.wireframe = true;
+  e.target.classList.add('active');
+  document.getElementById('btnSolid').classList.remove('active');
+});
+
+// ---------------------------------------------------------------
+// 5) Boucle de rendu + redimensionnement
+// ---------------------------------------------------------------
+function animate() {
+  requestAnimationFrame(animate);
+  controls.update();
+  renderer.render(scene, camera);
+}
+
+window.addEventListener('resize', () => {
+  camera.aspect = wrap.clientWidth / wrap.clientHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(wrap.clientWidth, wrap.clientHeight);
+});
+
+init();
+</script>
+
+</body>
+</html>
