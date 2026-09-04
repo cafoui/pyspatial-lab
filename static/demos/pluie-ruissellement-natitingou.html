@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pluie &amp; ruissellement 3D — Natitingou</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --ink:#0F2138; --ink-soft:#1B324E; --paper:#EDEFE9;
+    --brass:#C08A3E; --brass-dark:#A2712F;
+    --sage:#5C7A66; --slate:#486074;
+    --water:#5FB4E5; --water-deep:#1E5A8C;
+    --border:#2C4460;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; height:100%; font-family:'Public Sans',sans-serif; background:var(--ink); color:#EDEFE9; overflow:hidden; }
+
+  .rn-app{ display:flex; flex-direction:column; height:100vh; }
+
+  header.rn-bar{
+    background:var(--ink); border-bottom:1px solid var(--brass-dark);
+    padding:0.9rem 1.2rem; display:flex; align-items:baseline; gap:0.7rem; flex-wrap:wrap; z-index:2;
+  }
+  header.rn-bar h1{ font-family:'Fraunces',serif; font-size:1.1rem; margin:0; color:#fff; font-weight:700; }
+  header.rn-bar span.tag{
+    font-family:'JetBrains Mono',monospace; font-size:0.7rem; letter-spacing:0.08em;
+    color:var(--brass); border:1px solid var(--brass-dark); padding:0.15rem 0.5rem; border-radius:3px;
+  }
+
+  .rn-body{ flex:1; position:relative; min-height:0; }
+  #canvas-wrap{ position:absolute; inset:0; }
+  canvas{ display:block; }
+
+  .rn-panel{
+    position:absolute; top:1rem; left:1rem; width:270px;
+    background:rgba(27,50,78,0.92); border:1px solid var(--border); border-radius:8px;
+    padding:1rem; backdrop-filter:blur(4px);
+  }
+  .rn-panel h2{
+    font-family:'JetBrains Mono',monospace; font-size:0.66rem; letter-spacing:0.1em; text-transform:uppercase;
+    color:#8FA0AE; margin:0 0 0.5rem;
+  }
+  .rn-row{ margin-bottom:0.9rem; }
+  .rn-row label{ display:flex; justify-content:space-between; font-size:0.8rem; margin-bottom:0.3rem; }
+  .rn-row span.val{ font-family:'JetBrains Mono',monospace; color:var(--brass); }
+  input[type="range"]{ width:100%; accent-color:var(--water); }
+
+  label.rn-toggle{ display:flex; align-items:center; gap:0.5rem; font-size:0.85rem; margin-bottom:0.5rem; cursor:pointer; }
+  label.rn-toggle input{ accent-color:var(--water); }
+
+  .rn-stats{ display:flex; gap:0.5rem; margin-top:0.3rem; }
+  .rn-stat{
+    flex:1; background:var(--ink); border:1px solid var(--border); border-radius:6px; padding:0.55rem;
+    font-family:'JetBrains Mono',monospace; text-align:center;
+  }
+  .rn-stat strong{ display:block; font-size:1.1rem; color:#fff; font-family:'Fraunces',serif; }
+  .rn-stat small{ color:#8FA0AE; font-size:0.6rem; text-transform:uppercase; }
+
+  .rn-legend{ display:flex; flex-direction:column; gap:0.35rem; font-size:0.78rem; }
+  .rn-legend div{ display:flex; align-items:center; gap:0.5rem; }
+  .rn-legend .dot{ width:9px; height:9px; border-radius:50%; flex-shrink:0; }
+  .rn-legend .line{ width:20px; height:0; flex-shrink:0; }
+
+  .rn-loading{
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    font-family:'JetBrains Mono',monospace; color:#8FA0AE; font-size:0.85rem;
+  }
+</style>
+</head>
+<body>
+
+<div class="rn-app">
+  <header class="rn-bar">
+    <h1>Pluie &amp; ruissellement — chaîne de l'Atacora</h1>
+    <span class="tag">MNT RÉEL · ÉCOULEMENT D8 CALCULÉ</span>
+  </header>
+
+  <div class="rn-body">
+    <div id="canvas-wrap"></div>
+    <div class="rn-loading" id="loading">Chargement du relief et du champ d'écoulement…</div>
+
+    <div class="rn-panel" id="panel" style="display:none;">
+      <h2>Pluie</h2>
+      <div class="rn-row">
+        <label>Intensité <span class="val" id="rainVal">1200</span></label>
+        <input type="range" id="rainCount" min="0" max="3000" step="100" value="1200">
+      </div>
+      <label class="rn-toggle"><input type="checkbox" id="togglePause"> Pause</label>
+
+      <h2>Relief</h2>
+      <div class="rn-row">
+        <label>Exagération verticale <span class="val" id="exagVal">15×</span></label>
+        <input type="range" id="exag" min="1" max="40" step="1" value="15">
+      </div>
+      <label class="rn-toggle"><input type="checkbox" id="toggleNetwork" checked> Réseau de ruissellement calculé</label>
+
+      <h2>Légende</h2>
+      <div class="rn-legend">
+        <div><span class="dot" style="background:#BFE0F5"></span> Goutte en chute</div>
+        <div><span class="dot" style="background:#1E5A8C"></span> Goutte qui ruisselle</div>
+        <div><span class="line" style="border-top:2px solid #5FB4E5"></span> Réseau accumulé (calculé)</div>
+      </div>
+
+      <div class="rn-stats">
+        <div class="rn-stat"><strong id="statFalling">–</strong><small>en chute</small></div>
+        <div class="rn-stat"><strong id="statFlowing">–</strong><small>ruissellent</small></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+const wrap = document.getElementById('canvas-wrap');
+const loading = document.getElementById('loading');
+const panel = document.getElementById('panel');
+
+const PLANE_WIDTH = 100;
+let PLANE_DEPTH = 100;
+let gridW, gridH, elevMin, elevMax, exaggeration = 15;
+let heights;        // 0..1 par cellule (gridW*gridH)
+let flowdirGrid;     // 0..8 par cellule
+let worldX, worldZ;  // coordonnées scène par colonne / ligne
+let terrainY;        // altitude scène courante par cellule (dépend de l'exagération)
+
+const NEI_DI = [-1,-1,-1,0,0,1,1,1];
+const NEI_DJ = [-1,0,1,-1,1,-1,0,1];
+
+// ---------------------------------------------------------------
+// 1) Scène, ciel, caméra, lumière
+// ---------------------------------------------------------------
+const scene = new THREE.Scene();
+
+function makeSkyTexture() {
+  const c = document.createElement('canvas');
+  c.width = 2; c.height = 256;
+  const ctx = c.getContext('2d');
+  const grad = ctx.createLinearGradient(0, 0, 0, 256);
+  grad.addColorStop(0, '#0B1B33');
+  grad.addColorStop(0.45, '#2E5C82');
+  grad.addColorStop(0.75, '#7FA8C4');
+  grad.addColorStop(1, '#C7D8E2');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, 2, 256);
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  return tex;
+}
+scene.background = makeSkyTexture();
+scene.fog = new THREE.Fog(0x7FA8C4, 140, 320);
+
+const camera = new THREE.PerspectiveCamera(45, wrap.clientWidth / wrap.clientHeight, 0.1, 1000);
+camera.position.set(65, 60, 95);
+
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(wrap.clientWidth, wrap.clientHeight);
+renderer.setPixelRatio(window.devicePixelRatio);
+wrap.appendChild(renderer.domElement);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+
+scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+const sun = new THREE.DirectionalLight(0xfff2d9, 1.15);
+sun.position.set(-70, 130, 50);
+scene.add(sun);
+
+// ---------------------------------------------------------------
+// 2) Charger heightmap + grille de direction d'écoulement + réseau
+// ---------------------------------------------------------------
+let terrainMesh, networkLines;
+
+function loadImage(src) {
+  return new Promise((res, rej) => { const img = new Image(); img.onload = () => res(img); img.onerror = rej; img.src = src; });
+}
+function readChannel(img, w, h) {
+  const c = document.createElement('canvas'); c.width = w; c.height = h;
+  const ctx = c.getContext('2d'); ctx.drawImage(img, 0, 0, w, h);
+  const data = ctx.getImageData(0, 0, w, h).data;
+  const arr = new Float32Array(w * h);
+  for (let i = 0; i < w*h; i++) arr[i] = data[i*4];
+  return arr;
+}
+
+async function init() {
+  const meta = await (await fetch('./data/mnt-natitingou-heightmap-meta.json')).json();
+  gridW = meta.width; gridH = meta.height;
+  elevMin = meta.elev_min; elevMax = meta.elev_max;
+  PLANE_DEPTH = PLANE_WIDTH * (gridH / gridW);
+
+  const [hImg, fImg, netJson] = await Promise.all([
+    loadImage('./data/mnt-natitingou-heightmap.png'),
+    loadImage('./data/flowdir_natitingou.png'),
+    fetch('./data/reseau_natitingou.json').then(r => r.json())
+  ]);
+
+  const rawH = readChannel(hImg, gridW, gridH);
+  heights = new Float32Array(gridW*gridH);
+  for (let i=0;i<rawH.length;i++) heights[i] = rawH[i]/255;
+
+  const rawF = readChannel(fImg, gridW, gridH);
+  flowdirGrid = new Uint8Array(gridW*gridH);
+  for (let i=0;i<rawF.length;i++) flowdirGrid[i] = Math.round(rawF[i]);
+
+  buildTerrain(exaggeration);
+  buildNetwork(netJson);
+  initRain();
+
+  loading.style.display = 'none';
+  panel.style.display = 'block';
+  animate();
+}
+
+// ---------------------------------------------------------------
+// 3) Terrain (identique à l'article précédent)
+// ---------------------------------------------------------------
+function colorForElevation(t) {
+  const stops = [[0.00,[92,122,102]],[0.55,[192,138,62]],[1.00,[237,239,233]]];
+  for (let i=0;i<stops.length-1;i++){
+    const [t0,c0]=stops[i], [t1,c1]=stops[i+1];
+    if (t>=t0 && t<=t1){ const f=(t-t0)/(t1-t0);
+      return [Math.round(c0[0]+f*(c1[0]-c0[0])), Math.round(c0[1]+f*(c1[1]-c0[1])), Math.round(c0[2]+f*(c1[2]-c0[2]))]; }
+  }
+  return stops[stops.length-1][1];
+}
+
+function buildTerrain(exag) {
+  if (terrainMesh) scene.remove(terrainMesh);
+  const geometry = new THREE.PlaneGeometry(PLANE_WIDTH, PLANE_DEPTH, gridW-1, gridH-1);
+  geometry.rotateX(-Math.PI/2);
+  const pos = geometry.attributes.position;
+
+  if (!worldX) {
+    worldX = new Float32Array(gridW); worldZ = new Float32Array(gridH);
+    for (let i=0;i<gridW;i++) worldX[i] = pos.getX(i);
+    for (let j=0;j<gridH;j++) worldZ[j] = pos.getZ(j*gridW);
+  }
+
+  const realWidthKm = 61.5;
+  const unitsPerKm = PLANE_WIDTH / realWidthKm;
+  const exagUnits = (exag * unitsPerKm) / 1000;
+
+  terrainY = new Float32Array(gridW*gridH);
+  const colors = new Float32Array(pos.count*3);
+  for (let j=0;j<gridH;j++){
+    for (let i=0;i<gridW;i++){
+      const idx = j*gridW+i;
+      const t = heights[idx];
+      const elevM = elevMin + t*(elevMax-elevMin);
+      const y = elevM*exagUnits;
+      terrainY[idx] = y;
+      pos.setY(idx, y);
+      const [r,g,b] = colorForElevation(t);
+      colors[idx*3]=r/255; colors[idx*3+1]=g/255; colors[idx*3+2]=b/255;
+    }
+  }
+  geometry.setAttribute('color', new THREE.BufferAttribute(colors,3));
+  geometry.computeVertexNormals();
+
+  const material = new THREE.MeshStandardMaterial({ vertexColors:true, roughness:0.9, metalness:0.05 });
+  terrainMesh = new THREE.Mesh(geometry, material);
+  scene.add(terrainMesh);
+
+  if (networkLines) buildNetworkGeometry();
+}
+
+// ---------------------------------------------------------------
+// 4) Réseau de ruissellement calculé (lignes posées sur le relief)
+// ---------------------------------------------------------------
+let networkData;
+function buildNetwork(data) {
+  networkData = data;
+  buildNetworkGeometry();
+}
+function buildNetworkGeometry() {
+  if (networkLines) { scene.remove(networkLines); }
+  if (!networkData || !terrainY) return;
+  const group = new THREE.Group();
+  const widthByOrder = { 1: 0.6, 2: 1.1, 3: 1.7, 4: 2.3 };
+  networkData.segments.forEach(seg => {
+    const pts = seg.path.map(([i,j]) => new THREE.Vector3(worldX[i], terrainY[j*gridW+i] + 0.15, worldZ[j]));
+    const geo = new THREE.BufferGeometry().setFromPoints(pts);
+    const mat = new THREE.LineBasicMaterial({ color: 0x5FB4E5, linewidth: widthByOrder[seg.order]||1 });
+    group.add(new THREE.Line(geo, mat));
+  });
+  networkLines = group;
+  networkLines.visible = document.getElementById('toggleNetwork').checked;
+  scene.add(networkLines);
+}
+
+// ---------------------------------------------------------------
+// 5) Pluie : chute libre puis ruissellement guidé par flowdirGrid
+// ---------------------------------------------------------------
+const MAX_DROPS = 3000;
+let dropState, dropI, dropJ, dropNextI, dropNextJ, dropT, dropActive, dropFalling;
+let points, positions, colorsAttr;
+let activeCount = 1200;
+
+function skyY() { return (elevMax - elevMin) * (exaggeration * (PLANE_WIDTH/61.5) / 1000) + 25; }
+
+function resetDrop(k) {
+  const i = Math.floor(Math.random()*gridW), j = Math.floor(Math.random()*gridH);
+  dropI[k]=i; dropJ[k]=j;
+  positions[k*3] = worldX[i];
+  positions[k*3+1] = skyY() + Math.random()*20;
+  positions[k*3+2] = worldZ[j];
+  dropFalling[k] = 1;
+  colorsAttr[k*3]=0.75; colorsAttr[k*3+1]=0.88; colorsAttr[k*3+2]=0.96;
+}
+
+function initRain() {
+  dropI = new Int32Array(MAX_DROPS); dropJ = new Int32Array(MAX_DROPS);
+  dropNextI = new Int32Array(MAX_DROPS); dropNextJ = new Int32Array(MAX_DROPS);
+  dropT = new Float32Array(MAX_DROPS);
+  dropFalling = new Uint8Array(MAX_DROPS);
+
+  positions = new Float32Array(MAX_DROPS*3);
+  colorsAttr = new Float32Array(MAX_DROPS*3);
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  geo.setAttribute('color', new THREE.BufferAttribute(colorsAttr, 3));
+  const mat = new THREE.PointsMaterial({ size: 0.55, vertexColors:true, transparent:true, opacity:0.9 });
+  points = new THREE.Points(geo, mat);
+  scene.add(points);
+
+  for (let k=0;k<MAX_DROPS;k++) resetDrop(k);
+}
+
+function stepRain(dt) {
+  let falling=0, flowing=0;
+  for (let k=0;k<activeCount;k++) {
+    if (dropFalling[k]) {
+      falling++;
+      positions[k*3+1] -= 42*dt;
+      const i = dropI[k], j = dropJ[k];
+      const groundY = terrainY[j*gridW+i];
+      if (positions[k*3+1] <= groundY) {
+        dropFalling[k] = 0;
+        positions[k*3+1] = groundY;
+        colorsAttr[k*3]=0.12; colorsAttr[k*3+1]=0.35; colorsAttr[k*3+2]=0.55;
+        const f = flowdirGrid[j*gridW+i];
+        if (f===8) { resetDrop(k); continue; }
+        dropNextI[k] = i+NEI_DI[f]; dropNextJ[k] = j+NEI_DJ[f]; dropT[k]=0;
+      }
+    } else {
+      flowing++;
+      dropT[k] += dt*1.4;
+      const i0=dropI[k], j0=dropJ[k], i1=dropNextI[k], j1=dropNextJ[k];
+      if (i1<0||i1>=gridW||j1<0||j1>=gridH) { resetDrop(k); continue; }
+      const t = Math.min(dropT[k], 1);
+      positions[k*3]   = worldX[i0] + (worldX[i1]-worldX[i0])*t;
+      positions[k*3+1] = terrainY[j0*gridW+i0] + (terrainY[j1*gridW+i1]-terrainY[j0*gridW+i0])*t;
+      positions[k*3+2] = worldZ[j0] + (worldZ[j1]-worldZ[j0])*t;
+      if (dropT[k] >= 1) {
+        dropI[k]=i1; dropJ[k]=j1;
+        const f = flowdirGrid[j1*gridW+i1];
+        if (f===8) { resetDrop(k); continue; }
+        dropNextI[k]=i1+NEI_DI[f]; dropNextJ[k]=j1+NEI_DJ[f]; dropT[k]=0;
+      }
+    }
+  }
+  points.geometry.attributes.position.needsUpdate = true;
+  points.geometry.attributes.color.needsUpdate = true;
+  points.geometry.setDrawRange(0, activeCount);
+  document.getElementById('statFalling').textContent = falling;
+  document.getElementById('statFlowing').textContent = flowing;
+}
+
+// ---------------------------------------------------------------
+// 6) Contrôles
+// ---------------------------------------------------------------
+let paused = false;
+document.getElementById('togglePause').addEventListener('change', e => paused = e.target.checked);
+document.getElementById('rainCount').addEventListener('input', e => {
+  activeCount = parseInt(e.target.value);
+  document.getElementById('rainVal').textContent = activeCount;
+});
+document.getElementById('exag').addEventListener('input', e => {
+  exaggeration = parseFloat(e.target.value);
+  document.getElementById('exagVal').textContent = exaggeration + '×';
+  buildTerrain(exaggeration);
+});
+document.getElementById('toggleNetwork').addEventListener('change', e => {
+  if (networkLines) networkLines.visible = e.target.checked;
+});
+
+// ---------------------------------------------------------------
+// 7) Boucle de rendu
+// ---------------------------------------------------------------
+const clock = new THREE.Clock();
+function animate() {
+  requestAnimationFrame(animate);
+  const dt = Math.min(clock.getDelta(), 0.05);
+  controls.update();
+  if (!paused) stepRain(dt);
+  renderer.render(scene, camera);
+}
+
+window.addEventListener('resize', () => {
+  camera.aspect = wrap.clientWidth/wrap.clientHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(wrap.clientWidth, wrap.clientHeight);
+});
+
+init();
+</script>
+
+</body>
+</html>
