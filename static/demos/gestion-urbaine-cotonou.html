@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gestion urbaine — Densité bâtie de Cotonou</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --ink:#0F2138; --ink-soft:#1B324E; --paper:#EDEFE9;
+    --brass:#C08A3E; --brass-dark:#A2712F;
+    --sage:#5C7A66; --slate:#486074;
+    --border:#2C4460;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; height:100%; font-family:'Public Sans',sans-serif; background:var(--ink); color:#EDEFE9; }
+
+  .ub-app{ display:flex; flex-direction:column; height:100vh; }
+
+  header.ub-bar{
+    background:var(--ink); border-bottom:1px solid var(--brass-dark);
+    padding:0.9rem 1.2rem; display:flex; align-items:baseline; gap:0.7rem; flex-wrap:wrap;
+  }
+  header.ub-bar h1{ font-family:'Fraunces',serif; font-size:1.1rem; margin:0; color:#fff; font-weight:700; }
+  header.ub-bar span.tag{
+    font-family:'JetBrains Mono',monospace; font-size:0.7rem; letter-spacing:0.08em;
+    color:var(--brass); border:1px solid var(--brass-dark); padding:0.15rem 0.5rem; border-radius:3px;
+  }
+
+  .ub-body{ flex:1; display:flex; min-height:0; }
+
+  aside.ub-panel{
+    width:300px; flex-shrink:0; background:var(--ink-soft); border-right:1px solid var(--border);
+    padding:1.1rem; overflow-y:auto;
+  }
+  @media (max-width: 780px){
+    .ub-body{ flex-direction:column; }
+    aside.ub-panel{ width:100%; border-right:none; border-bottom:1px solid var(--border); max-height:50vh; }
+  }
+
+  .ub-group{ margin-bottom:1.2rem; }
+  .ub-group h2{
+    font-family:'JetBrains Mono',monospace; font-size:0.7rem; letter-spacing:0.1em; text-transform:uppercase;
+    color:#8FA0AE; margin:0 0 0.6rem;
+  }
+
+  .ub-row label{ display:flex; justify-content:space-between; font-size:0.82rem; margin-bottom:0.35rem; }
+  .ub-row span.val{ font-family:'JetBrains Mono',monospace; color:var(--brass); }
+  input[type="range"]{ width:100%; accent-color:var(--brass); }
+
+  .ub-stats{ display:flex; flex-direction:column; gap:0.5rem; }
+  .ub-stat{
+    background:var(--ink); border:1px solid var(--border); border-radius:6px; padding:0.7rem;
+    font-family:'JetBrains Mono',monospace;
+  }
+  .ub-stat strong{ display:block; font-size:1.3rem; color:#fff; font-family:'Fraunces',serif; }
+  .ub-stat small{ color:#8FA0AE; font-size:0.65rem; text-transform:uppercase; letter-spacing:0.04em; }
+
+  .ub-legend{ display:flex; flex-direction:column; gap:0.35rem; font-size:0.78rem; }
+  .ub-legend .bar{ height:10px; border-radius:3px; background:linear-gradient(90deg,#1B324E,#486074,#C08A3E,#FFD166); margin-bottom:0.3rem; }
+  .ub-legend .labels{ display:flex; justify-content:space-between; font-family:'JetBrains Mono',monospace; font-size:0.68rem; color:#8FA0AE; }
+
+  .ub-note{ font-size:0.76rem; color:#8FA0AE; line-height:1.5; }
+
+  #map{ flex:1; }
+  .leaflet-popup-content-wrapper{ background:var(--ink-soft); color:#EDEFE9; border:1px solid var(--brass-dark); border-radius:6px; }
+  .leaflet-popup-tip{ background:var(--ink-soft); }
+
+  .ub-label{
+    background:rgba(15,33,56,0.9) !important; border:1px solid var(--brass-dark) !important;
+    color:#EDEFE9 !important; font-family:'Public Sans',sans-serif !important; font-size:0.72rem !important;
+    padding:0.15rem 0.45rem !important; border-radius:3px !important; box-shadow:none !important;
+  }
+  .ub-label::before{ display:none !important; }
+</style>
+</head>
+<body>
+
+<div class="ub-app">
+  <header class="ub-bar">
+    <h1>Gestion urbaine — Densité bâtie</h1>
+    <span class="tag">COTONOU · DONNÉES ILLUSTRATIVES</span>
+  </header>
+
+  <div class="ub-body">
+    <aside class="ub-panel">
+      <div class="ub-group">
+        <h2>Filtre</h2>
+        <div class="ub-row">
+          <label>Densité minimale affichée <span class="val" id="threshVal">0%</span></label>
+          <input type="range" id="thresh" min="0" max="100" step="5" value="0">
+        </div>
+      </div>
+
+      <div class="ub-group">
+        <h2>Repères</h2>
+        <label style="display:flex; align-items:center; gap:0.5rem; font-size:0.85rem; cursor:pointer;">
+          <input type="checkbox" id="toggleLandmarks" checked style="accent-color:var(--brass);">
+          Afficher les noms des bâtiments repères
+        </label>
+      </div>
+
+      <div class="ub-group">
+        <h2>Vue d'ensemble</h2>
+        <div class="ub-stats">
+          <div class="ub-stat"><strong id="statTotal">–</strong><small>bâtiments estimés (ville entière)</small></div>
+          <div class="ub-stat"><strong id="statVisible">–</strong><small>cellules affichées</small></div>
+          <div class="ub-stat"><strong id="statAvg">–</strong><small>bâtiments/cellule en moyenne (affiché)</small></div>
+        </div>
+      </div>
+
+      <div class="ub-group">
+        <h2>Légende — densité bâtie</h2>
+        <div class="ub-legend">
+          <div class="bar"></div>
+          <div class="labels"><span>Faible</span><span>Forte</span></div>
+        </div>
+      </div>
+
+      <div class="ub-group">
+        <h2>À propos</h2>
+        <p class="ub-note">
+          Grille de densité <strong>générée pour illustrer la méthode</strong>
+          (agrégation par cellule de ~275 m), pas mesurée sur de vraies
+          données OSM — l'article explique comment brancher un vrai
+          export Overpass à la place.
+        </p>
+      </div>
+    </aside>
+
+    <div id="map"></div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+  const map = L.map('map').setView([6.362, 2.42], 12);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    maxZoom: 18
+  }).addTo(map);
+  document.querySelector('.leaflet-tile-pane') && (document.querySelector('.leaflet-tile-pane').style.filter =
+    'invert(1) hue-rotate(180deg) brightness(0.95) contrast(0.9) saturate(0.8)');
+
+  const gridLayer = L.layerGroup().addTo(map);
+  const landmarksLayer = L.layerGroup().addTo(map);
+  let allFeatures = [], totalBuildings = 0;
+
+  // ---------------------------------------------------------------
+  // Bâtiments / lieux repères réels de Cotonou (coordonnées
+  // approximatives — à vérifier/affiner avec un relevé GPS ou OSM
+  // précis avant un usage officiel)
+  // ---------------------------------------------------------------
+  const LANDMARKS = [
+    { name: "Marché Dantokpa", lat: 6.3646, lon: 2.4308, type: "marché" },
+    { name: "Cathédrale Notre-Dame de Cotonou", lat: 6.3565, lon: 2.4270, type: "religieux" },
+    { name: "Stade de l'Amitié (Kouhounou)", lat: 6.3735, lon: 2.4204, type: "sport" },
+    { name: "Aéroport Cardinal Bernardin Gantin", lat: 6.3572, lon: 2.3844, type: "transport" },
+    { name: "Palais des Congrès", lat: 6.3580, lon: 2.4260, type: "administratif" },
+    { name: "Place de l'Étoile Rouge", lat: 6.3660, lon: 2.4265, type: "repère" },
+  ];
+
+  const LANDMARK_COLOR = { "marché":"#C08A3E", "religieux":"#5C7A66", "sport":"#B33951",
+                            "transport":"#486074", "administratif":"#8B5CF6", "repère":"#EDEFE9" };
+
+  LANDMARKS.forEach(lm => {
+    const marker = L.circleMarker([lm.lat, lm.lon], {
+      radius: 6, color: '#0F2138', weight: 1.5,
+      fillColor: LANDMARK_COLOR[lm.type] || '#C08A3E', fillOpacity: 1
+    });
+    marker.bindTooltip(lm.name, {
+      permanent: true, direction: 'top', offset: [0,-6], className: 'ub-label'
+    });
+    marker.bindPopup(`<b>${lm.name}</b><br><span style="font-family:'JetBrains Mono',monospace;font-size:0.75rem;color:#8FA0AE">${lm.type}</span>`);
+    landmarksLayer.addLayer(marker);
+  });
+
+  function colorForDensity(d) {
+    const stops = [[0,[27,50,78]],[0.4,[72,96,116]],[0.7,[192,138,62]],[1,[255,209,102]]];
+    for (let i=0;i<stops.length-1;i++){
+      const [t0,c0]=stops[i], [t1,c1]=stops[i+1];
+      if (d>=t0 && d<=t1){ const f=(d-t0)/(t1-t0);
+        return `rgb(${Math.round(c0[0]+f*(c1[0]-c0[0]))},${Math.round(c0[1]+f*(c1[1]-c0[1]))},${Math.round(c0[2]+f*(c1[2]-c0[2]))})`; }
+    }
+    return 'rgb(255,209,102)';
+  }
+
+  fetch('./data/cotonou_densite.json')
+    .then(r => r.json())
+    .then(geojson => {
+      allFeatures = geojson.features;
+      totalBuildings = geojson.meta.total_buildings_est;
+      document.getElementById('statTotal').textContent = totalBuildings.toLocaleString('fr-FR');
+      render();
+    });
+
+  function render() {
+    const threshPct = parseFloat(document.getElementById('thresh').value) / 100;
+    gridLayer.clearLayers();
+    let visible = 0, sumBuildings = 0;
+
+    allFeatures.forEach(f => {
+      const d = f.properties.density;
+      if (d < threshPct) return;
+      visible++;
+      sumBuildings += f.properties.n_buildings_est;
+
+      L.geoJSON(f, {
+        style: { fillColor: colorForDensity(d), fillOpacity: 0.75, color: '#0F2138', weight: 0.5 }
+      }).bindPopup(`
+        <b>Densité : ${(d*100).toFixed(0)}%</b><br>
+        ~${f.properties.n_buildings_est} bâtiments estimés dans cette cellule (~275×275 m)
+      `).addTo(gridLayer);
+    });
+
+    document.getElementById('statVisible').textContent = visible;
+    document.getElementById('statAvg').textContent = visible ? Math.round(sumBuildings/visible) : '–';
+  }
+
+  document.getElementById('thresh').addEventListener('input', e => {
+    document.getElementById('threshVal').textContent = e.target.value + '%';
+    render();
+  });
+  document.getElementById('toggleLandmarks').addEventListener('change', e => {
+    map[e.target.checked ? 'addLayer' : 'removeLayer'](landmarksLayer);
+  });
+</script>
+
+</body>
+</html>
