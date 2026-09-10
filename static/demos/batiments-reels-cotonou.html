@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bâtiments réels — Cotonou (OpenStreetMap)</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --ink:#0F2138; --ink-soft:#1B324E; --paper:#EDEFE9;
+    --brass:#C08A3E; --brass-dark:#A2712F;
+    --sage:#5C7A66; --slate:#486074;
+    --border:#2C4460;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; height:100%; font-family:'Public Sans',sans-serif; background:var(--ink); color:#EDEFE9; }
+
+  .bc-app{ display:flex; flex-direction:column; height:100vh; }
+
+  header.bc-bar{
+    background:var(--ink); border-bottom:1px solid var(--brass-dark);
+    padding:0.9rem 1.2rem; display:flex; align-items:baseline; gap:0.7rem; flex-wrap:wrap;
+  }
+  header.bc-bar h1{ font-family:'Fraunces',serif; font-size:1.1rem; margin:0; color:#fff; font-weight:700; }
+  header.bc-bar span.tag{
+    font-family:'JetBrains Mono',monospace; font-size:0.7rem; letter-spacing:0.08em;
+    color:var(--brass); border:1px solid var(--brass-dark); padding:0.15rem 0.5rem; border-radius:3px;
+  }
+
+  .bc-body{ flex:1; display:flex; min-height:0; }
+
+  aside.bc-panel{
+    width:300px; flex-shrink:0; background:var(--ink-soft); border-right:1px solid var(--border);
+    padding:1.1rem; overflow-y:auto; display:flex; flex-direction:column;
+  }
+  @media (max-width: 780px){
+    .bc-body{ flex-direction:column; }
+    aside.bc-panel{ width:100%; border-right:none; border-bottom:1px solid var(--border); max-height:50vh; }
+  }
+
+  .bc-group{ margin-bottom:1.1rem; }
+  .bc-group h2{
+    font-family:'JetBrains Mono',monospace; font-size:0.7rem; letter-spacing:0.1em; text-transform:uppercase;
+    color:#8FA0AE; margin:0 0 0.6rem;
+  }
+
+  label.bc-toggle{ display:flex; align-items:center; gap:0.5rem; font-size:0.85rem; margin-bottom:0.5rem; cursor:pointer; }
+  label.bc-toggle input{ accent-color:var(--brass); }
+
+  .bc-stats{ display:flex; gap:0.5rem; }
+  .bc-stat{
+    flex:1; background:var(--ink); border:1px solid var(--border); border-radius:6px; padding:0.6rem;
+    font-family:'JetBrains Mono',monospace; text-align:center;
+  }
+  .bc-stat strong{ display:block; font-size:1.2rem; color:#fff; font-family:'Fraunces',serif; }
+  .bc-stat small{ color:#8FA0AE; font-size:0.6rem; text-transform:uppercase; }
+
+  .bc-legend{ display:flex; flex-direction:column; gap:0.35rem; font-size:0.78rem; }
+  .bc-legend div{ display:flex; align-items:center; gap:0.5rem; }
+  .bc-legend .sw{ width:13px; height:13px; border-radius:2px; flex-shrink:0; }
+
+  .bc-list{ flex:1; min-height:0; overflow-y:auto; display:flex; flex-direction:column; gap:0.4rem; }
+  .bc-item{
+    background:var(--ink); border:1px solid var(--border); border-radius:6px; padding:0.5rem 0.6rem;
+    cursor:pointer; font-size:0.82rem; transition:border-color 0.15s;
+  }
+  .bc-item:hover{ border-color:var(--brass); }
+  .bc-item small{ display:block; color:#8FA0AE; font-family:'JetBrains Mono',monospace; font-size:0.65rem; margin-top:0.15rem; }
+
+  .bc-note{ font-size:0.75rem; color:#8FA0AE; line-height:1.5; }
+
+  #map{ flex:1; }
+  .leaflet-popup-content-wrapper{ background:var(--ink-soft); color:#EDEFE9; border:1px solid var(--brass-dark); border-radius:6px; }
+  .leaflet-popup-tip{ background:var(--ink-soft); }
+</style>
+</head>
+<body>
+
+<div class="bc-app">
+  <header class="bc-bar">
+    <h1>Bâtiments réels de Cotonou</h1>
+    <span class="tag">OPENSTREETMAP · 4 870 EMPREINTES RÉELLES</span>
+  </header>
+
+  <div class="bc-body">
+    <aside class="bc-panel">
+      <div class="bc-group">
+        <label class="bc-toggle"><input type="checkbox" id="onlyNamed"> Afficher uniquement les bâtiments nommés</label>
+      </div>
+
+      <div class="bc-group">
+        <div class="bc-stats">
+          <div class="bc-stat"><strong id="statTotal">–</strong><small>bâtiments</small></div>
+          <div class="bc-stat"><strong id="statNamed">–</strong><small>nommés</small></div>
+        </div>
+      </div>
+
+      <div class="bc-group">
+        <h2>Légende</h2>
+        <div class="bc-legend">
+          <div><span class="sw" style="background:#C08A3E"></span> Bâtiment nommé (OSM)</div>
+          <div><span class="sw" style="background:#486074"></span> Bâtiment sans nom</div>
+        </div>
+      </div>
+
+      <div class="bc-group" style="flex:1; min-height:0; display:flex; flex-direction:column;">
+        <h2>Bâtiments identifiés</h2>
+        <div class="bc-list" id="namedList"></div>
+      </div>
+
+      <div class="bc-group">
+        <p class="bc-note">
+          Empreintes réelles extraites d'OpenStreetMap via l'API Overpass
+          (voir l'article associé) — zone du centre de Cotonou. Seuls
+          17 bâtiments sur 4 870 portent un nom dans OSM : la grande
+          majorité des bâtiments n'y sont pas encore renseignés, ce qui
+          est normal pour une carte communautaire.
+        </p>
+      </div>
+    </aside>
+
+    <div id="map"></div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+  const map = L.map('map').setView([6.3639, 2.4281], 15);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    maxZoom: 19
+  }).addTo(map);
+  document.querySelector('.leaflet-tile-pane') && (document.querySelector('.leaflet-tile-pane').style.filter =
+    'invert(1) hue-rotate(180deg) brightness(0.95) contrast(0.9) saturate(0.8)');
+
+  const buildingsLayer = L.layerGroup().addTo(map);
+  let allFeatures = [];
+  const namedMarkers = {};
+
+  fetch('./data/batiments_cotonou.geojson')
+    .then(r => r.json())
+    .then(geojson => {
+      allFeatures = geojson.features;
+      document.getElementById('statTotal').textContent = allFeatures.length.toLocaleString('fr-FR');
+      const named = allFeatures.filter(f => f.properties.name);
+      document.getElementById('statNamed').textContent = named.length;
+
+      const list = document.getElementById('namedList');
+      named.forEach((f, i) => {
+        const item = document.createElement('div');
+        item.className = 'bc-item';
+        item.innerHTML = `${f.properties.name}<small>${f.properties.amenity || f.properties.building}</small>`;
+        item.addEventListener('click', () => {
+          const bounds = L.geoJSON(f).getBounds();
+          map.fitBounds(bounds, { maxZoom: 18 });
+          if (namedMarkers[i]) namedMarkers[i].openPopup();
+        });
+        list.appendChild(item);
+      });
+
+      render();
+    });
+
+  function popupHTML(p) {
+    const title = p.name || '(bâtiment sans nom)';
+    return `<b>${title}</b><br><span style="font-family:'JetBrains Mono',monospace;font-size:0.75rem;color:#8FA0AE">${p.amenity || p.building || 'building'}</span>`;
+  }
+
+  function render() {
+    const onlyNamed = document.getElementById('onlyNamed').checked;
+    buildingsLayer.clearLayers();
+
+    allFeatures.forEach((f, i) => {
+      if (onlyNamed && !f.properties.name) return;
+      const isNamed = !!f.properties.name;
+      const layer = L.geoJSON(f, {
+        style: {
+          color: isNamed ? '#C08A3E' : '#0F2138',
+          weight: isNamed ? 2 : 0.5,
+          fillColor: isNamed ? '#C08A3E' : '#486074',
+          fillOpacity: isNamed ? 0.55 : 0.45
+        }
+      }).bindPopup(popupHTML(f.properties));
+      if (isNamed) namedMarkers[i] = layer.getLayers()[0];
+      buildingsLayer.addLayer(layer);
+    });
+  }
+
+  document.getElementById('onlyNamed').addEventListener('change', render);
+</script>
+
+</body>
+</html>
