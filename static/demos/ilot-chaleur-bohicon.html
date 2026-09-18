@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Îlot de chaleur urbain — Bohicon</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --ink:#0F2138; --ink-soft:#1B324E; --paper:#EDEFE9;
+    --brass:#C08A3E; --brass-dark:#A2712F;
+    --sage:#5C7A66; --slate:#486074; --heat:#B33951;
+    --border:#2C4460;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; height:100%; font-family:'Public Sans',sans-serif; background:var(--ink); color:#EDEFE9; }
+
+  .hb-app{ display:flex; flex-direction:column; height:100vh; }
+  header.hb-bar{
+    background:var(--ink); border-bottom:1px solid var(--brass-dark);
+    padding:0.9rem 1.2rem; display:flex; align-items:baseline; gap:0.7rem; flex-wrap:wrap;
+  }
+  header.hb-bar h1{ font-family:'Fraunces',serif; font-size:1.1rem; margin:0; color:#fff; font-weight:700; }
+  header.hb-bar span.tag{
+    font-family:'JetBrains Mono',monospace; font-size:0.7rem; letter-spacing:0.08em;
+    color:var(--brass); border:1px solid var(--brass-dark); padding:0.15rem 0.5rem; border-radius:3px;
+  }
+
+  .hb-body{ flex:1; display:flex; min-height:0; }
+  aside.hb-panel{
+    width:310px; flex-shrink:0; background:var(--ink-soft); border-right:1px solid var(--border);
+    padding:1.1rem; overflow-y:auto;
+  }
+  @media (max-width: 780px){
+    .hb-body{ flex-direction:column; }
+    aside.hb-panel{ width:100%; border-right:none; border-bottom:1px solid var(--border); max-height:52vh; }
+  }
+
+  .hb-group{ margin-bottom:1.1rem; }
+  .hb-group h2{
+    font-family:'JetBrains Mono',monospace; font-size:0.7rem; letter-spacing:0.1em; text-transform:uppercase;
+    color:#8FA0AE; margin:0 0 0.6rem;
+  }
+
+  .hb-hero{
+    background:linear-gradient(135deg, rgba(179,57,81,0.25), rgba(192,138,62,0.15));
+    border:1px solid var(--heat); border-radius:8px; padding:0.9rem; text-align:center;
+  }
+  .hb-hero strong{ display:block; font-family:'Fraunces',serif; font-size:2.1rem; color:#fff; line-height:1; }
+  .hb-hero small{ display:block; color:#E0B8C2; font-size:0.7rem; text-transform:uppercase; letter-spacing:0.06em; margin-top:0.3rem; }
+
+  .hb-stats{ display:flex; gap:0.5rem; margin-top:0.5rem; }
+  .hb-stat{
+    flex:1; background:var(--ink); border:1px solid var(--border); border-radius:6px; padding:0.6rem;
+    font-family:'JetBrains Mono',monospace; text-align:center;
+  }
+  .hb-stat strong{ display:block; font-size:1.05rem; color:#fff; font-family:'Fraunces',serif; }
+  .hb-stat small{ color:#8FA0AE; font-size:0.58rem; text-transform:uppercase; }
+
+  .hb-row label{ display:flex; justify-content:space-between; font-size:0.82rem; margin-bottom:0.35rem; }
+  .hb-row span.val{ font-family:'JetBrains Mono',monospace; color:var(--brass); }
+  input[type="range"]{ width:100%; accent-color:var(--heat); }
+  label.hb-toggle{ display:flex; align-items:center; gap:0.5rem; font-size:0.84rem; margin-bottom:0.45rem; cursor:pointer; }
+  label.hb-toggle input{ accent-color:var(--brass); }
+
+  .hb-legend .bar{ height:12px; border-radius:3px; background:linear-gradient(90deg,#2C5F8A,#5C7A66,#C08A3E,#B33951,#7A1F33); margin-bottom:0.3rem; }
+  .hb-legend .labels{ display:flex; justify-content:space-between; font-family:'JetBrains Mono',monospace; font-size:0.66rem; color:#8FA0AE; }
+
+  button.hb-btn{
+    width:100%; background:var(--brass-dark); color:#fff; border:none; border-radius:4px;
+    padding:0.6rem; font-family:'Public Sans',sans-serif; font-weight:600; font-size:0.84rem; cursor:pointer;
+    margin-top:0.4rem;
+  }
+  button.hb-btn:hover{ background:var(--brass); }
+  button.hb-btn.secondary{ background:var(--ink); border:1px solid var(--border); }
+
+  .hb-note{ font-size:0.73rem; color:#8FA0AE; line-height:1.5; }
+  .hb-note strong{ color:var(--brass); }
+
+  #map{ flex:1; }
+  .leaflet-popup-content-wrapper{ background:var(--ink-soft); color:#EDEFE9; border:1px solid var(--brass-dark); border-radius:6px; }
+  .leaflet-popup-tip{ background:var(--ink-soft); }
+  .hb-loading{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    font-family:'JetBrains Mono',monospace; color:#8FA0AE; font-size:0.85rem; z-index:500; }
+</style>
+</head>
+<body>
+
+<div class="hb-app">
+  <header class="hb-bar">
+    <h1>Îlot de chaleur urbain — Bohicon</h1>
+    <span class="tag">LANDSAT 8/9 · DONNÉES RÉELLES</span>
+  </header>
+
+  <div class="hb-body">
+    <aside class="hb-panel">
+      <div class="hb-group">
+        <div class="hb-hero">
+          <strong id="statIcu">–</strong>
+          <small>Intensité de l'îlot de chaleur</small>
+        </div>
+        <div class="hb-stats">
+          <div class="hb-stat"><strong id="statUrbain">–</strong><small>urbain (0-3 km)</small></div>
+          <div class="hb-stat"><strong id="statRural">–</strong><small>rural (6-10 km)</small></div>
+        </div>
+        <div class="hb-stats">
+          <div class="hb-stat"><strong id="statMin">–</strong><small>minimum</small></div>
+          <div class="hb-stat"><strong id="statMax">–</strong><small>maximum</small></div>
+        </div>
+      </div>
+
+      <div class="hb-group">
+        <h2>Analyse</h2>
+        <div class="hb-row">
+          <label>Seuil de température <span class="val" id="threshVal">—</span></label>
+          <input type="range" id="thresh" min="0" max="100" step="1" value="0">
+        </div>
+        <div class="hb-stat" style="margin-top:0.3rem;">
+          <strong id="statAbove">–</strong><small>surface au-dessus du seuil</small>
+        </div>
+        <label class="hb-toggle" style="margin-top:0.6rem;"><input type="checkbox" id="showZones" checked> Afficher les zones urbaine et rurale</label>
+      </div>
+
+      <div class="hb-group">
+        <h2>Légende (°C)</h2>
+        <div class="hb-legend">
+          <div class="bar"></div>
+          <div class="labels"><span id="legMin">–</span><span id="legMax">–</span></div>
+        </div>
+      </div>
+
+      <div class="hb-group">
+        <h2>Export</h2>
+        <button class="hb-btn" id="dlAll">Télécharger la grille complète (CSV)</button>
+        <button class="hb-btn secondary" id="dlHot">Télécharger les points au-dessus du seuil (CSV)</button>
+      </div>
+
+      <div class="hb-group">
+        <p class="hb-note">
+          <strong>Données réelles</strong> : moyenne de 5 images Landsat 8/9
+          (saison sèche nov. 2025 – mars 2026), bande thermique ST_B10,
+          résolution 30 m, calculée sur Google Earth Engine. Seule la zone
+          circulaire de 10 km autour du centre de Bohicon est analysée —
+          les coins hors de ce cercle sont masqués.
+        </p>
+      </div>
+    </aside>
+
+    <div id="map" style="position:relative;">
+      <div class="hb-loading" id="loading">Chargement des données Landsat…</div>
+    </div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const CENTER = [7.1781, 2.0667];
+const map = L.map('map').setView(CENTER, 12);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+  maxZoom: 18
+}).addTo(map);
+document.querySelector('.leaflet-tile-pane') && (document.querySelector('.leaflet-tile-pane').style.filter =
+  'invert(1) hue-rotate(180deg) brightness(0.95) contrast(0.9) saturate(0.8)');
+
+const heatLayer = L.layerGroup().addTo(map);
+const zonesLayer = L.layerGroup().addTo(map);
+
+// Cercles de référence du calcul (mêmes rayons que le script Python)
+L.circle(CENTER, { radius: 3000, color:'#B33951', weight:2, fill:false, dashArray:'6 4' })
+  .bindTooltip('Zone urbaine (0-3 km)').addTo(zonesLayer);
+L.circle(CENTER, { radius: 6000, color:'#5C7A66', weight:1.5, fill:false, dashArray:'4 6' })
+  .bindTooltip('Limite intérieure de l\'anneau rural (6 km)').addTo(zonesLayer);
+L.circle(CENTER, { radius: 10000, color:'#5C7A66', weight:2, fill:false, dashArray:'6 4' })
+  .bindTooltip('Limite extérieure de l\'anneau rural (10 km)').addTo(zonesLayer);
+
+let points = [], meta = null;
+
+function colorForTemp(t) {
+  // t normalisé 0..1
+  const stops = [[0,[44,95,138]],[0.3,[92,122,102]],[0.55,[192,138,62]],[0.8,[179,57,81]],[1,[122,31,51]]];
+  for (let i=0;i<stops.length-1;i++){
+    const [t0,c0]=stops[i], [t1,c1]=stops[i+1];
+    if (t>=t0 && t<=t1){ const f=(t-t0)/(t1-t0);
+      return `rgb(${Math.round(c0[0]+f*(c1[0]-c0[0]))},${Math.round(c0[1]+f*(c1[1]-c0[1]))},${Math.round(c0[2]+f*(c1[2]-c0[2]))})`; }
+  }
+  return 'rgb(122,31,51)';
+}
+
+function haversineKm(lat1, lon1, lat2, lon2) {
+  const R = 6371, toRad = d => d*Math.PI/180;
+  const dLat = toRad(lat2-lat1), dLon = toRad(lon2-lon1);
+  const a = Math.sin(dLat/2)**2 + Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLon/2)**2;
+  return 2*R*Math.asin(Math.sqrt(a));
+}
+
+async function init() {
+  meta = await (await fetch('./data/lst_bohicon_meta.json')).json();
+  const img = await new Promise((res, rej) => {
+    const im = new Image(); im.onload = () => res(im); im.onerror = rej;
+    im.src = './data/lst_bohicon_grid.png';
+  });
+
+  const c = document.createElement('canvas');
+  c.width = meta.width; c.height = meta.height;
+  const ctx = c.getContext('2d');
+  ctx.drawImage(img, 0, 0, meta.width, meta.height);
+  const px = ctx.getImageData(0, 0, meta.width, meta.height).data;
+
+  const [lonMin, latMin, lonMax, latMax] = meta.bounds;
+
+  // Sous-échantillonner l'affichage pour rester fluide (1 point sur 2)
+  const STEP = 2;
+  for (let j = 0; j < meta.height; j += STEP) {
+    for (let i = 0; i < meta.width; i += STEP) {
+      const lon = lonMin + ((i + 0.5) / meta.width) * (lonMax - lonMin);
+      const lat = latMax - ((j + 0.5) / meta.height) * (latMax - latMin);
+
+      // Masquer les pixels hors du cercle d'analyse de 10 km
+      if (haversineKm(CENTER[0], CENTER[1], lat, lon) > 10) continue;
+
+      const v = px[(j * meta.width + i) * 4] / 255;
+      const tempC = meta.temp_min + v * (meta.temp_max - meta.temp_min);
+      points.push({ lat, lon, temp: tempC, norm: v });
+    }
+  }
+
+  document.getElementById('statIcu').textContent = '+' + meta.intensite_icu.toFixed(2) + '°C';
+  document.getElementById('statUrbain').textContent = meta.temp_urbaine_moy.toFixed(1) + '°';
+  document.getElementById('statRural').textContent = meta.temp_rurale_moy.toFixed(1) + '°';
+
+  const temps = points.map(p => p.temp);
+  document.getElementById('statMin').textContent = Math.min(...temps).toFixed(1) + '°';
+  document.getElementById('statMax').textContent = Math.max(...temps).toFixed(1) + '°';
+  document.getElementById('legMin').textContent = meta.temp_min.toFixed(1);
+  document.getElementById('legMax').textContent = meta.temp_max.toFixed(1);
+
+  const slider = document.getElementById('thresh');
+  slider.min = Math.floor(Math.min(...temps));
+  slider.max = Math.ceil(Math.max(...temps));
+  slider.step = 0.5;
+  slider.value = slider.min;
+
+  document.getElementById('loading').style.display = 'none';
+  render();
+}
+
+function render() {
+  const thresh = parseFloat(document.getElementById('thresh').value);
+  document.getElementById('threshVal').textContent = thresh.toFixed(1) + ' °C';
+  heatLayer.clearLayers();
+
+  let above = 0;
+  points.forEach(p => {
+    if (p.temp < thresh) return;
+    above++;
+    L.circleMarker([p.lat, p.lon], {
+      radius: 3.2, stroke: false,
+      fillColor: colorForTemp(p.norm), fillOpacity: 0.72
+    }).bindPopup(`<b>${p.temp.toFixed(1)} °C</b><br>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:#8FA0AE">
+      ${p.lat.toFixed(4)}, ${p.lon.toFixed(4)}</span>`).addTo(heatLayer);
+  });
+
+  // Chaque point représente une cellule de 60 m de côté (30 m × STEP 2)
+  const areaKm2 = above * 0.06 * 0.06;
+  document.getElementById('statAbove').textContent = areaKm2.toFixed(1) + ' km²';
+}
+
+document.getElementById('thresh').addEventListener('input', render);
+document.getElementById('showZones').addEventListener('change', e => {
+  map[e.target.checked ? 'addLayer' : 'removeLayer'](zonesLayer);
+});
+
+function downloadCSV(rows, filename) {
+  const header = 'latitude,longitude,temperature_c\n';
+  const body = rows.map(p => `${p.lat.toFixed(5)},${p.lon.toFixed(5)},${p.temp.toFixed(2)}`).join('\n');
+  const blob = new Blob([header + body], { type:'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = filename;
+  link.click();
+  URL.revokeObjectURL(link.href);
+}
+
+document.getElementById('dlAll').addEventListener('click', () =>
+  downloadCSV(points, 'lst_bohicon_grille_complete.csv'));
+document.getElementById('dlHot').addEventListener('click', () => {
+  const thresh = parseFloat(document.getElementById('thresh').value);
+  downloadCSV(points.filter(p => p.temp >= thresh), `lst_bohicon_au_dessus_${thresh}C.csv`);
+});
+
+init().catch(err => {
+  document.getElementById('loading').innerHTML =
+    `⚠️ Erreur de chargement :<br><span style="color:#FF6B6B">${err.message}</span>`;
+  console.error(err);
+});
+</script>
+
+</body>
+</html>
